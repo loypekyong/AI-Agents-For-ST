@@ -1,0 +1,33 @@
+{
+    "title": "",
+    "description": "",
+    "language": "en",
+    "supp_id": "",
+    "created_on": 1729674293,
+    "components": {
+        "embedding_model": {
+            "subclass_name": "OpenAIEmbedding",
+            "dimension": 768,
+            "model": "text-embedding-3-small"
+        },
+        "reranker": {
+            "subclass_name": "NoReranker",
+            "ignore_absolute_relevance": false
+        },
+        "auto_context_model": {
+            "subclass_name": "OpenAIChatAPI",
+            "model": "gpt-4o-mini",
+            "temperature": 0.2,
+            "max_tokens": 1000
+        },
+        "vector_db": {
+            "subclass_name": "ChromaDB",
+            "kb_id": "CommAero_CabinInterior_ParrotSA_2022"
+        },
+        "chunk_db": {
+            "subclass_name": "BasicChunkDB",
+            "kb_id": "CommAero_CabinInterior_ParrotSA_2022",
+            "storage_directory": "/home/user/AI-Agents-For-ST/dsRAG/storage"
+        }
+    }
+}
