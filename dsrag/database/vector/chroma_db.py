@@ -40,7 +40,7 @@ def format_metadata_filter(metadata_filter: MetadataFilter) -> dict:
 
 class ChromaDB(VectorDB):
 
-    def __init__(self, kb_id: str, storage_directory: str = "~/dsRAG"):
+    def __init__(self, kb_id: str, storage_directory: str = "~/AI-Agents-For-ST/storage"):
         self.kb_id = kb_id
         self.storage_directory = os.path.expanduser(storage_directory)
         self.vector_storage_path = os.path.join(
