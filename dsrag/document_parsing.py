@@ -1,26 +1,18 @@
-import PyPDF2
+import pymupdf
 import docx2txt
 
 
 def extract_text_from_pdf(file_path: str) -> tuple[str, list]:
     with open(file_path, 'rb') as file:
         # Create a PDF reader object
-        pdf_reader = PyPDF2.PdfReader(file)
-
-        # Initialize an empty string to store the extracted text
-        extracted_text = ""
-
-        # Loop through all the pages in the PDF file
         pages = []
-        for page_num in range(len(pdf_reader.pages)):
-            # Extract the text from the current page
-            page_text = pdf_reader.pages[page_num].extract_text()
-            pages.append(page_text)
-
-            # Add the extracted text to the final text
-            extracted_text += page_text
-
-    return extracted_text, pages
+        extracted_text = ''
+        pdf_document = pymupdf.open(file)
+        for page in pdf_document:
+            text = page.get_text()
+            pages.append(text)
+            extracted_text += text
+        return extracted_text, pages
 
 
 def extract_text_from_docx(file_path: str) -> str:
