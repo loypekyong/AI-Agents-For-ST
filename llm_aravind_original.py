@@ -71,7 +71,7 @@ tools = [{
 }]
 
 client = OpenAI()
-question = "What is the revenue of Echostar 2021"
+question = "What is the revenue of Echostar 2022"
 
 system = {"role":"system", "content":"You are a financial analyst at a large investment firm. You have been asked to analyze the financial performance of a company."}
 

@@ -1,0 +1,36 @@
+from dsrag.knowledge_base import KnowledgeBase
+from dsrag.llm import OpenAIChatAPI
+from dsrag.reranker import CohereReranker, NoReranker
+
+from dsrag.database.vector.chroma_db import ChromaDB
+from dsrag.document_parsing import extract_text_from_pdf
+
+# import environment variables
+from dotenv import load_dotenv
+from openai import OpenAI
+import os, json
+
+load_dotenv()
+
+llm = OpenAIChatAPI(model='gpt-4o-mini')
+# reranker = CohereReranker()
+reranker = NoReranker()
+
+com_id = "CommAero"
+uss_id = "USS"
+
+com_kb = KnowledgeBase(com_id, reranker = reranker, vector_db=ChromaDB(com_id), storage_directory="~/AI-Agents-For-ST/storage")
+uss_kb = KnowledgeBase(uss_id, reranker = reranker, vector_db=ChromaDB(uss_id), storage_directory="~/AI-Agents-For-ST/storage")
+
+# query = "What is the Revenue of OrixCorp in 2021?"
+id = "Satcom Echostar 2021"
+
+# documents = uss_kb.query(query)
+# print(documents[0]["text"])
+# print(uss_kb.chunk_db.data.keys())
+chunks = len(uss_kb.chunk_db.data[id])
+# print(chunks)
+for i in range(chunks):
+    print(uss_kb.chunk_db.get_chunk_text(id, i))
+
+# print(uss_kb.chunk_db.get_chunk_text(id, 2))

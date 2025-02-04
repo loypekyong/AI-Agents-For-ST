@@ -71,7 +71,7 @@ tools = [{
 }]
 
 client = OpenAI()
-question = "What is the revenue of Echostar 2021"
+question = "What is the revenue of Safran 2022"
 
 system = {"role":"system", "content":"You are a financial analyst at a large investment firm. You have been asked to analyze the financial performance of a company."}
 
@@ -97,9 +97,9 @@ if tool_calls:
     tool_query = json.loads(tool_calls[0].function.arguments)['query']
 
     if tool_function_name == "query_com_kb":
-        context = query_com_kb(tool_query)
+        context = query_com_kb(question)
     elif tool_function_name == "query_uss_kb":
-        context = query_uss_kb(tool_query)
+        context = query_uss_kb(question)
     else:
         print(f"Unknown tool function: {tool_function_name}")
         context = "I'm sorry, I don't have that information."
