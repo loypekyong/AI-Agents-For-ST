@@ -13,8 +13,8 @@ import os, json
 load_dotenv()
 
 llm = OpenAIChatAPI(model='gpt-4o-mini')
-# reranker = CohereReranker()
-reranker = NoReranker()
+reranker = CohereReranker()
+# reranker = NoReranker()
 
 com_id = "CommAero"
 uss_id = "USS"
@@ -22,15 +22,17 @@ uss_id = "USS"
 com_kb = KnowledgeBase(com_id, reranker = reranker, vector_db=ChromaDB(com_id), storage_directory="~/AI-Agents-For-ST/storage")
 uss_kb = KnowledgeBase(uss_id, reranker = reranker, vector_db=ChromaDB(uss_id), storage_directory="~/AI-Agents-For-ST/storage")
 
-# query = "What is the Revenue of OrixCorp in 2021?"
-id = "Satcom Echostar 2021"
+query = "Airbus 2021 revenue"
+id = "General Airbus 2021"
 
-# documents = uss_kb.query(query)
-# print(documents[0]["text"])
+documents = com_kb.query(query)
+print(documents)
+print(documents[0]["text"])
+# print(com_kb.chunk_db.data.keys())
 # print(uss_kb.chunk_db.data.keys())
-chunks = len(uss_kb.chunk_db.data[id])
+# chunks = len(com_kb.chunk_db.data[id])
 # print(chunks)
-for i in range(chunks):
-    print(uss_kb.chunk_db.get_chunk_text(id, i))
+# for i in range(chunks):
+#     print(com_kb.chunk_db.get_chunk_text(id, i))
 
-# print(uss_kb.chunk_db.get_chunk_text(id, 2))
+# # print(uss_kb.chunk_db.get_chunk_text(id, 2))
