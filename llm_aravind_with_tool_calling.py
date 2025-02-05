@@ -96,10 +96,12 @@ if tool_calls:
     tool_function_name = tool_calls[0].function.name
     tool_query = json.loads(tool_calls[0].function.arguments)['query']
 
+    tool_query = "What is the" + tool_query
+
     if tool_function_name == "query_com_kb":
-        context = query_com_kb(question)
+        context = query_com_kb(tool_query)
     elif tool_function_name == "query_uss_kb":
-        context = query_uss_kb(question)
+        context = query_uss_kb(tool_query)
     else:
         print(f"Unknown tool function: {tool_function_name}")
         context = "I'm sorry, I don't have that information."
