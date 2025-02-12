@@ -1,10 +1,11 @@
 import sys
 import os
 sys.path.append('C:/Users/limyo/anaconda3/envs/dsrag/Lib/site-packages/neo4j')
-print(sys.executable)
 from neo4j import GraphDatabase
 import json
 from collections import defaultdict
+from dotenv import load_dotenv
+load_dotenv()
 
 class Neo4jConnection:
     def __init__(self, uri, user, password):
@@ -18,35 +19,6 @@ class Neo4jConnection:
     def close(self):
         self.driver.close()
 
-    # def create_data(session, data):
-    #     # Create Document Node
-    #     doc_query = f'''
-    #     CREATE (d:Document {{
-    #         kb_id: '{data["kb_id"]}',
-    #         doc_id: '{data["doc_id"]}',
-    #         doc_title: '{data["document_title"]}',
-    #         doc_summary: '{data["document_summary"]}'
-    #     }}) 
-    #     '''
-    #     session.run(doc_query)
-
-    #     # Create Section Node
-    #     section_query = f'''
-    #     CREATE (s:Section {{
-    #         sec_title: '{data["section_title"]}',
-    #         sec_summary: '{data["section_summary"]}',
-    #         sec_chunk_text: '{data["chunk_text"]}'
-    #     }}) 
-    #     '''
-    #     session.run(section_query)
-
-    #     # Create Relationship between Document and Section
-    #     relationship_query = f'''
-    #     MATCH (d:Document {{doc_id: '{data["doc_id"]}'}}), 
-    #         (s:Section {{title: '{data["section_title"]}'}})
-    #     CREATE (d)-[:CONTAINS]->(s)
-    #     '''
-    #     session.run(relationship_query)
     def load_json_files_from_directory(self, directory):
         grouped_data = defaultdict(list)
     
@@ -138,7 +110,7 @@ class Neo4jConnection:
                 tx.run(relationship_query, kb_id=kb_id, department_id=doc_id_sections[2])
             
 
-                # # ########################################################################
+                ##########################################################################
 
 
                 doc_query = f'''
@@ -156,7 +128,7 @@ class Neo4jConnection:
                 '''
                 tx.run(relationship_query, department_id=doc_id_sections[2], doc_id=doc_id.split(".")[0][:-4])
 
-                # ########################################################################
+                #########################################################################
 
 
                 year_query = f'''
@@ -174,7 +146,7 @@ class Neo4jConnection:
                 '''
                 tx.run(relationship_query, doc_id=doc_id.split(".")[0][:-4], doc_year=doc_year)
             
-                # ########################################################################
+                #########################################################################
 
             
                 doc_title = f'''
@@ -194,7 +166,7 @@ class Neo4jConnection:
 
             
 
-                # ########################################################################
+                #########################################################################
 
 
                 doc_summ = f'''
@@ -223,54 +195,34 @@ class Neo4jConnection:
                         sec_title = ""
                     section_title = f'''
                     MERGE (s:Section {{
-                        sec_title: $sec_title,
-                        sec_summary: $sec_summary
+                        sec_title: $sec_title
                     }})
                     ON CREATE SET s.doc_summary=$doc_summary, s.doc_title=$doc_title
                     '''
-                    tx.run(section_title, sec_summary=entry["section_summary"], sec_title=sec_title, doc_summary=document_summary, doc_title=document_title)
+                    tx.run(section_title, sec_title=sec_title, doc_summary=document_summary, doc_title=document_title)
 
                     # Create Relationship between Document and Section
                     relationship_query = f'''
-                    MATCH (ds:Document_summ {{doc_summary: $doc_summary}}), 
+                    MATCH (ds:Document_summ {{doc_title: $doc_title}}), 
                         (s:Section {{sec_title: $sec_title, doc_title: $doc_title}})
                     MERGE (ds)-[:HAS_SECTION_TITLE]->(s)
                     '''
-                    tx.run(relationship_query, doc_summary=document_summary, sec_title=sec_title, doc_title=document_title)
+                    tx.run(relationship_query, sec_title=sec_title, doc_title=document_title)
 
 
                     ########################################################################
 
 
-                    # s.sec_summary=$sec_summary, s.sec_chunk_text=$sec_chunk_text 
-                    # sec_summary=entry["section_summary"], sec_chunk_text=entry["chunk_text"]
-
-
 if __name__ == "__main__":
-    uri = "neo4j+s://0406f932.databases.neo4j.io"
-    user = "neo4j"
-    password = "0vLIefc9JZtISxmsbPrAhMGZDtnZ8HY681j2HVjmZyQ"  
+    uri = os.getenv("NEO4J_URI")
+    user = os.getenv("NEO4J_USERNAME")
+    password = os.getenv("NEO4J_PASSWORD")  
 
     connection = Neo4jConnection(uri, user, password)
 
-    # Load data from JSON file
-    # with open('test_data.json', 'r') as f:
-    #     data = json.load(f)
     directory_path = 'data/'  # Change to your directory
     data = connection.load_json_files_from_directory(directory_path)
 
-    # data = {
-    #     'kb_id': 'st_eng_1h2023',
-    #     'doc_id': 'st-engineering-1h2023-financial-statement',
-    #     'section_title': 'Consolidated Income Statement for the First Half-Year',
-    #     'section_summary': '',
-    #     'chunk_text': "1 CONSOLIDATED INCOME STATEMENT FOR THE FIRST HALF -YEAR  ENDED 30 JUNE 2023...",
-    #     'document_title': 'CONDENSED INTERIM FINANCIAL STATEMENTS FOR THE FIRST HALF -YEAR ENDED 30 JUNE 2023',
-    #     'document_summary': "This document is about: ..."
-    # }
-    # print(len(data))
-    # with open(f'data/out.json', 'w') as f:
-    #         json.dump(data, f)
     try:
         with connection.driver.session() as session:
             connection.create_data(session, data)
@@ -278,4 +230,4 @@ if __name__ == "__main__":
     except Exception as e:
         print("Error occurred during data creation:", e)
 
-    # connection.close()
+    connection.close()
