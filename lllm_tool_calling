@@ -17,8 +17,8 @@ reranker = NoReranker()
 com_id = "CommAero"
 uss_id = "USS"
 
-com_kb = KnowledgeBase(com_id, reranker=reranker, vector_db=ChromaDB(com_id), storage_directory="~/AI-Agents-For-ST/storage")
-uss_kb = KnowledgeBase(uss_id, reranker=reranker, vector_db=ChromaDB(uss_id), storage_directory="~/AI-Agents-For-ST/storage")
+com_kb = KnowledgeBase(com_id, reranker=reranker, vector_db=ChromaDB(com_id), storage_directory="./storage")
+uss_kb = KnowledgeBase(uss_id, reranker=reranker, vector_db=ChromaDB(uss_id), storage_directory="./storage")
 
 def query_com_kb(query):
     document = com_kb.query(query)
