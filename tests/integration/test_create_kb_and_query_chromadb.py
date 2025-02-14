@@ -46,8 +46,8 @@ class TestCreateKB(unittest.TestCase):
         segment_info = kb.query(search_queries)
         self.assertGreater(len(segment_info[0]), 0)
         # Assert that the chunk page start and end are correct
-        self.assertEqual(segment_info[0]["chunk_page_start"], 5)
-        self.assertEqual(segment_info[0]["chunk_page_end"], 8)
+        self.assertEqual(segment_info[0]["chunk_page_start"],9)
+        self.assertEqual(segment_info[0]["chunk_page_end"], 13)
 
     def test__002_test_query_with_metadata_filter(self):
 

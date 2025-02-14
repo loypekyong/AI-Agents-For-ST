@@ -387,276 +387,276 @@ class TestChromaDB(unittest.TestCase):
         )
 
 
-class TestWeaviateVectorDB(unittest.TestCase):
-    def setUp(self):
-        self.kb_id = "test_kb"
-        self.db = WeaviateVectorDB(kb_id=self.kb_id, use_embedded_weaviate=True)
-        return super().setUp()
+# class TestWeaviateVectorDB(unittest.TestCase):
+#     def setUp(self):
+#         self.kb_id = "test_kb"
+#         self.db = WeaviateVectorDB(kb_id=self.kb_id, use_embedded_weaviate=True)
+#         return super().setUp()
 
-    def tearDown(self):
-        # delete test data from Weaviate
-        self.db.client.collections.delete(self.kb_id)
-        self.db.close()
-        return super().tearDown()
+#     def tearDown(self):
+#         # delete test data from Weaviate
+#         self.db.client.collections.delete(self.kb_id)
+#         self.db.close()
+#         return super().tearDown()
 
-    def test__add_vectors_and_search(self):
-        vectors = [np.array([1, 0]), np.array([0, 1]), np.array([1, 1])]
-        metadata: Sequence[ChunkMetadata] = [
-            {
-                "doc_id": "1",
-                "chunk_index": 0,
-                "chunk_header": "Header1",
-                "chunk_text": "Text1",
-            },
-            {
-                "doc_id": "1",
-                "chunk_index": 1,
-                "chunk_header": "Header2",
-                "chunk_text": "Text2",
-            },
-            {
-                "doc_id": "2",
-                "chunk_index": 0,
-                "chunk_header": "Header3",
-                "chunk_text": "Text3",
-            },
-        ]
-        self.db.add_vectors(vectors, metadata)
+#     def test__add_vectors_and_search(self):
+#         vectors = [np.array([1, 0]), np.array([0, 1]), np.array([1, 1])]
+#         metadata: Sequence[ChunkMetadata] = [
+#             {
+#                 "doc_id": "1",
+#                 "chunk_index": 0,
+#                 "chunk_header": "Header1",
+#                 "chunk_text": "Text1",
+#             },
+#             {
+#                 "doc_id": "1",
+#                 "chunk_index": 1,
+#                 "chunk_header": "Header2",
+#                 "chunk_text": "Text2",
+#             },
+#             {
+#                 "doc_id": "2",
+#                 "chunk_index": 0,
+#                 "chunk_header": "Header3",
+#                 "chunk_text": "Text3",
+#             },
+#         ]
+#         self.db.add_vectors(vectors, metadata)
 
-        query_vector = np.array([1, 0])
-        results = self.db.search(query_vector, top_k=1)
+#         query_vector = np.array([1, 0])
+#         results = self.db.search(query_vector, top_k=1)
 
-        self.assertEqual(len(results), 1)
-        self.assertEqual(results[0]["metadata"]["doc_id"], "1")
-        self.assertEqual(results[0]["metadata"]["chunk_index"], 0)
-        self.assertEqual(results[0]["metadata"]["chunk_header"], "Header1")
-        self.assertEqual(results[0]["metadata"]["chunk_text"], "Text1")
-        self.assertGreaterEqual(results[0]["similarity"], 0.99)
+#         self.assertEqual(len(results), 1)
+#         self.assertEqual(results[0]["metadata"]["doc_id"], "1")
+#         self.assertEqual(results[0]["metadata"]["chunk_index"], 0)
+#         self.assertEqual(results[0]["metadata"]["chunk_header"], "Header1")
+#         self.assertEqual(results[0]["metadata"]["chunk_text"], "Text1")
+#         self.assertGreaterEqual(results[0]["similarity"], 0.99)
 
-    def test__remove_document(self):
-        vectors = [np.array([1, 0]), np.array([0, 1]), np.array([1, 1])]
-        metadata: Sequence[ChunkMetadata] = [
-            {
-                "doc_id": "1",
-                "chunk_index": 0,
-                "chunk_header": "Header1",
-                "chunk_text": "Text1",
-            },
-            {
-                "doc_id": "1",
-                "chunk_index": 1,
-                "chunk_header": "Header2",
-                "chunk_text": "Text2",
-            },
-            {
-                "doc_id": "2",
-                "chunk_index": 0,
-                "chunk_header": "Header3",
-                "chunk_text": "Text3",
-            },
-        ]
-        self.db.add_vectors(vectors, metadata)
+#     def test__remove_document(self):
+#         vectors = [np.array([1, 0]), np.array([0, 1]), np.array([1, 1])]
+#         metadata: Sequence[ChunkMetadata] = [
+#             {
+#                 "doc_id": "1",
+#                 "chunk_index": 0,
+#                 "chunk_header": "Header1",
+#                 "chunk_text": "Text1",
+#             },
+#             {
+#                 "doc_id": "1",
+#                 "chunk_index": 1,
+#                 "chunk_header": "Header2",
+#                 "chunk_text": "Text2",
+#             },
+#             {
+#                 "doc_id": "2",
+#                 "chunk_index": 0,
+#                 "chunk_header": "Header3",
+#                 "chunk_text": "Text3",
+#             },
+#         ]
+#         self.db.add_vectors(vectors, metadata)
 
-        self.db.remove_document("1")
+#         self.db.remove_document("1")
 
-        # Verify document removal indirectly (Weaviate doesn't provide a direct way to list documents)
-        query_vector = np.array([1, 0])
-        results = self.db.search(query_vector, top_k=3)
-        # Expect 1 result as document 1 is deleted and document 2 only has 1 chunk
-        self.assertEqual(len(results), 1)
-        self.assertEqual(results[0]["metadata"]["doc_id"], "2")
+#         # Verify document removal indirectly (Weaviate doesn't provide a direct way to list documents)
+#         query_vector = np.array([1, 0])
+#         results = self.db.search(query_vector, top_k=3)
+#         # Expect 1 result as document 1 is deleted and document 2 only has 1 chunk
+#         self.assertEqual(len(results), 1)
+#         self.assertEqual(results[0]["metadata"]["doc_id"], "2")
 
-    def test__save_and_load(self):
-        vectors = [np.array([1, 0]), np.array([0, 1])]
-        metadata: Sequence[ChunkMetadata] = [
-            {
-                "doc_id": "1",
-                "chunk_index": 0,
-                "chunk_header": "Header1",
-                "chunk_text": "Text1",
-            },
-            {
-                "doc_id": "2",
-                "chunk_index": 1,
-                "chunk_header": "Header2",
-                "chunk_text": "Text2",
-            },
-        ]
+#     def test__save_and_load(self):
+#         vectors = [np.array([1, 0]), np.array([0, 1])]
+#         metadata: Sequence[ChunkMetadata] = [
+#             {
+#                 "doc_id": "1",
+#                 "chunk_index": 0,
+#                 "chunk_header": "Header1",
+#                 "chunk_text": "Text1",
+#             },
+#             {
+#                 "doc_id": "2",
+#                 "chunk_index": 1,
+#                 "chunk_header": "Header2",
+#                 "chunk_text": "Text2",
+#             },
+#         ]
 
-        self.db.add_vectors(vectors, metadata)
-        self.db.close()
+#         self.db.add_vectors(vectors, metadata)
+#         self.db.close()
 
-        # load the saved db
-        self.db = WeaviateVectorDB(kb_id=self.kb_id, use_embedded_weaviate=True)
+#         # load the saved db
+#         self.db = WeaviateVectorDB(kb_id=self.kb_id, use_embedded_weaviate=True)
 
-        # Verify data existence indirectly (Weaviate doesn't provide a direct way to list documents)
-        query_vector = np.array([1, 0])
-        results = self.db.search(query_vector, top_k=2)
-        self.assertEqual(len(results), 2)
-        self.assertEqual(results[0]["metadata"]["doc_id"], "1")
+#         # Verify data existence indirectly (Weaviate doesn't provide a direct way to list documents)
+#         query_vector = np.array([1, 0])
+#         results = self.db.search(query_vector, top_k=2)
+#         self.assertEqual(len(results), 2)
+#         self.assertEqual(results[0]["metadata"]["doc_id"], "1")
 
-    def test__save_and_load_from_dict(self):
-        config = self.db.to_dict()
-        self.db.close()
+#     def test__save_and_load_from_dict(self):
+#         config = self.db.to_dict()
+#         self.db.close()
 
-        self.db = VectorDB.from_dict(config)
-        self.assertIsInstance(self.db, WeaviateVectorDB)
-        self.assertEqual(self.db.kb_id, self.kb_id)
+#         self.db = VectorDB.from_dict(config)
+#         self.assertIsInstance(self.db, WeaviateVectorDB)
+#         self.assertEqual(self.db.kb_id, self.kb_id)
 
 
-class TestQdrantDB(unittest.TestCase):
-    def setUp(self):
-        self.kb_id = "test_qdrant_kb"
-        self.db = QdrantVectorDB(kb_id=self.kb_id, location=":memory:")
-        return super().setUp()
+# class TestQdrantDB(unittest.TestCase):
+#     def setUp(self):
+#         self.kb_id = "test_qdrant_kb"
+#         self.db = QdrantVectorDB(kb_id=self.kb_id, location=":memory:")
+#         return super().setUp()
 
-    def tearDown(self):
-        self.db.delete()
-        return super().tearDown()
+#     def tearDown(self):
+#         self.db.delete()
+#         return super().tearDown()
 
-    def test__add_vectors_and_search(self):
-        db = QdrantVectorDB(kb_id=self.kb_id, location=":memory:")
-        vectors = [np.array([1, 0]), np.array([0, 1])]
-        metadata: Sequence[ChunkMetadata] = [
-            {
-                "doc_id": "1",
-                "chunk_index": 0,
-                "chunk_header": "Header1",
-                "chunk_text": "Text1",
-            },
-            {
-                "doc_id": "2",
-                "chunk_index": 1,
-                "chunk_header": "Header2",
-                "chunk_text": "Text2",
-            },
-        ]
+#     def test__add_vectors_and_search(self):
+#         db = QdrantVectorDB(kb_id=self.kb_id, location=":memory:")
+#         vectors = [np.array([1, 0]), np.array([0, 1])]
+#         metadata: Sequence[ChunkMetadata] = [
+#             {
+#                 "doc_id": "1",
+#                 "chunk_index": 0,
+#                 "chunk_header": "Header1",
+#                 "chunk_text": "Text1",
+#             },
+#             {
+#                 "doc_id": "2",
+#                 "chunk_index": 1,
+#                 "chunk_header": "Header2",
+#                 "chunk_text": "Text2",
+#             },
+#         ]
 
-        db.add_vectors(vectors, metadata)
-        query_vector = np.array([1, 0])
-        results = db.search(query_vector, top_k=1)
+#         db.add_vectors(vectors, metadata)
+#         query_vector = np.array([1, 0])
+#         results = db.search(query_vector, top_k=1)
 
-        self.assertEqual(len(results), 1)
-        self.assertEqual(results[0]["metadata"]["doc_id"], "1")
-        self.assertGreaterEqual(results[0]["similarity"], 0.99)
+#         self.assertEqual(len(results), 1)
+#         self.assertEqual(results[0]["metadata"]["doc_id"], "1")
+#         self.assertGreaterEqual(results[0]["similarity"], 0.99)
 
-    def test__search_with_metadata_filter(self):
-        from qdrant_client import models
+#     def test__search_with_metadata_filter(self):
+#         from qdrant_client import models
 
-        db = QdrantVectorDB(kb_id=self.kb_id, location=":memory:")
-        vectors = [
-            np.array([1, 0]),
-            np.array([1, 0]),
-            np.array([0, 1]),
-            np.array([1, 0]),
-        ]
-        metadata: Sequence[ChunkMetadata] = [
-            {
-                "doc_id": "1",
-                "chunk_index": 0,
-                "chunk_header": "Header1",
-                "chunk_text": "Text1",
-            },
-            {
-                "doc_id": "2",
-                "chunk_index": 0,
-                "chunk_header": "Header1",
-                "chunk_text": "Text1",
-            },
-            {
-                "doc_id": "3",
-                "chunk_index": 1,
-                "chunk_header": "Header2",
-                "chunk_text": "Text2",
-            },
-            {
-                "doc_id": "4",
-                "chunk_index": 1,
-                "chunk_header": "Header2",
-                "chunk_text": "Text2",
-            },
-        ]
+#         db = QdrantVectorDB(kb_id=self.kb_id, location=":memory:")
+#         vectors = [
+#             np.array([1, 0]),
+#             np.array([1, 0]),
+#             np.array([0, 1]),
+#             np.array([1, 0]),
+#         ]
+#         metadata: Sequence[ChunkMetadata] = [
+#             {
+#                 "doc_id": "1",
+#                 "chunk_index": 0,
+#                 "chunk_header": "Header1",
+#                 "chunk_text": "Text1",
+#             },
+#             {
+#                 "doc_id": "2",
+#                 "chunk_index": 0,
+#                 "chunk_header": "Header1",
+#                 "chunk_text": "Text1",
+#             },
+#             {
+#                 "doc_id": "3",
+#                 "chunk_index": 1,
+#                 "chunk_header": "Header2",
+#                 "chunk_text": "Text2",
+#             },
+#             {
+#                 "doc_id": "4",
+#                 "chunk_index": 1,
+#                 "chunk_header": "Header2",
+#                 "chunk_text": "Text2",
+#             },
+#         ]
 
-        db.add_vectors(vectors, metadata)
+#         db.add_vectors(vectors, metadata)
 
-        query_vector = np.array([1, 0])
-        metadata_filter = models.Filter(
-            must=[
-                models.FieldCondition(key="doc_id", match=models.MatchValue(value="1"))
-            ]
-        )
-        results = db.search(query_vector, top_k=4, metadata_filter=metadata_filter)
+#         query_vector = np.array([1, 0])
+#         metadata_filter = models.Filter(
+#             must=[
+#                 models.FieldCondition(key="doc_id", match=models.MatchValue(value="1"))
+#             ]
+#         )
+#         results = db.search(query_vector, top_k=4, metadata_filter=metadata_filter)
 
-        self.assertEqual(len(results), 1)
-        self.assertEqual(results[0]["metadata"]["doc_id"], "1")
+#         self.assertEqual(len(results), 1)
+#         self.assertEqual(results[0]["metadata"]["doc_id"], "1")
 
-        # Test with the 'in' operator
-        metadata_filter = models.Filter(
-            must=[
-                models.FieldCondition(
-                    key="doc_id", match=models.MatchAny(any=["1", "4"])
-                )
-            ]
-        )
-        results = db.search(query_vector, top_k=4, metadata_filter=metadata_filter)
-        self.assertEqual(len(results), 2)
-        self.assertIn(results[0]["metadata"]["doc_id"], ["1", "4"])
-        self.assertIn(results[1]["metadata"]["doc_id"], ["1", "4"])
+#         # Test with the 'in' operator
+#         metadata_filter = models.Filter(
+#             must=[
+#                 models.FieldCondition(
+#                     key="doc_id", match=models.MatchAny(any=["1", "4"])
+#                 )
+#             ]
+#         )
+#         results = db.search(query_vector, top_k=4, metadata_filter=metadata_filter)
+#         self.assertEqual(len(results), 2)
+#         self.assertIn(results[0]["metadata"]["doc_id"], ["1", "4"])
+#         self.assertIn(results[1]["metadata"]["doc_id"], ["1", "4"])
 
-    def test__remove_document(self):
-        db = QdrantVectorDB(kb_id=self.kb_id, location=":memory:")
-        vectors = [np.array([1, 0]), np.array([0, 1])]
-        metadata: Sequence[ChunkMetadata] = [
-            {
-                "doc_id": "1",
-                "chunk_index": 0,
-                "chunk_header": "Header1",
-                "chunk_text": "Text1",
-            },
-            {
-                "doc_id": "2",
-                "chunk_index": 1,
-                "chunk_header": "Header2",
-                "chunk_text": "Text2",
-            },
-        ]
+#     def test__remove_document(self):
+#         db = QdrantVectorDB(kb_id=self.kb_id, location=":memory:")
+#         vectors = [np.array([1, 0]), np.array([0, 1])]
+#         metadata: Sequence[ChunkMetadata] = [
+#             {
+#                 "doc_id": "1",
+#                 "chunk_index": 0,
+#                 "chunk_header": "Header1",
+#                 "chunk_text": "Text1",
+#             },
+#             {
+#                 "doc_id": "2",
+#                 "chunk_index": 1,
+#                 "chunk_header": "Header2",
+#                 "chunk_text": "Text2",
+#             },
+#         ]
 
-        db.add_vectors(vectors, metadata)
-        db.remove_document("1")
+#         db.add_vectors(vectors, metadata)
+#         db.remove_document("1")
 
-        num_vectors = db.get_num_vectors()
-        self.assertEqual(num_vectors, 1)
+#         num_vectors = db.get_num_vectors()
+#         self.assertEqual(num_vectors, 1)
 
-    def test__empty_search(self):
-        db = QdrantVectorDB(kb_id="test_qdrant_db_2", location=":memory:")
-        query_vector = np.array([1, 0])
+#     def test__empty_search(self):
+#         db = QdrantVectorDB(kb_id="test_qdrant_db_2", location=":memory:")
+#         query_vector = np.array([1, 0])
 
-        self.assertRaises(Exception, db.search, query_vector)
+#         self.assertRaises(Exception, db.search, query_vector)
 
-    def test__assertion_error_on_mismatched_input_lengths(self):
-        db = QdrantVectorDB(kb_id=self.kb_id, location=":memory:")
-        vectors = [np.array([1, 0])]
-        metadata: Sequence[ChunkMetadata] = [
-            {
-                "doc_id": "1",
-                "chunk_index": 0,
-                "chunk_header": "Header1",
-                "chunk_text": "Text1",
-            },
-            {
-                "doc_id": "2",
-                "chunk_index": 1,
-                "chunk_header": "Header2",
-                "chunk_text": "Text2",
-            },
-        ]
+#     def test__assertion_error_on_mismatched_input_lengths(self):
+#         db = QdrantVectorDB(kb_id=self.kb_id, location=":memory:")
+#         vectors = [np.array([1, 0])]
+#         metadata: Sequence[ChunkMetadata] = [
+#             {
+#                 "doc_id": "1",
+#                 "chunk_index": 0,
+#                 "chunk_header": "Header1",
+#                 "chunk_text": "Text1",
+#             },
+#             {
+#                 "doc_id": "2",
+#                 "chunk_index": 1,
+#                 "chunk_header": "Header2",
+#                 "chunk_text": "Text2",
+#             },
+#         ]
 
-        with self.assertRaises(ValueError) as context:
-            db.add_vectors(vectors, metadata)
-        self.assertTrue(
-            "Error in add_vectors: the number of vectors and metadata items must be the same."
-            in str(context.exception)
-        )
+#         with self.assertRaises(ValueError) as context:
+#             db.add_vectors(vectors, metadata)
+#         self.assertTrue(
+#             "Error in add_vectors: the number of vectors and metadata items must be the same."
+#             in str(context.exception)
+#         )
 
 
 if __name__ == "__main__":

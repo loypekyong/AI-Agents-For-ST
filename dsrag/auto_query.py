@@ -16,20 +16,22 @@ Each of the queries you generate will be used to search a knowledge base for inf
 def get_search_queries(user_input: str, auto_query_guidance: str = "", max_queries: int = 5):
     base_url = os.environ.get("DSRAG_OPENAI_BASE_URL", None)
     if base_url is not None:
-        client = instructor.from_openai(OpenAI(api_key=os.environ["OPENAI_API_KEY"], base_url=base_url))
+        client = instructor.from_openai(OpenAI(api_key=os.environ["OPENAI_API_KEY"]))
     else:
         client = instructor.from_openai(OpenAI(api_key=os.environ["OPENAI_API_KEY"]))
 
     class Queries(BaseModel):
         queries: List[str]
 
-    resp = client.messages.create(
+    resp = client.completions.create(
         model="gpt-4o-mini",
         max_tokens=400,
         temperature=0.2,
-        system=SYSTEM_MESSAGE.format(max_queries=max_queries, auto_query_guidance=auto_query_guidance),
+        
         messages=[
-            {
+            {   
+                "role": "system",
+                "content":SYSTEM_MESSAGE.format(max_queries=max_queries, auto_query_guidance=auto_query_guidance),
                 "role": "user",
                 "content": user_input
             }
