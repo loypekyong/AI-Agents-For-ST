@@ -1,6 +1,8 @@
 import sys
 import os
 import unittest
+from dotenv import load_dotenv
+load_dotenv()
 
 # add ../../ to sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))

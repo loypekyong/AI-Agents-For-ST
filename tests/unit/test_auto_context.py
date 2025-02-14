@@ -1,6 +1,8 @@
 import os
 import sys
 import unittest
+from dotenv import load_dotenv
+load_dotenv()
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "../..")))
 from dsrag.auto_context import get_document_title, get_document_summary, get_section_summary, get_chunk_header, get_segment_header

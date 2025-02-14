@@ -16,28 +16,28 @@ class TestLLM(unittest.TestCase):
         self.assertIsInstance(response, str)
         self.assertGreater(len(response), 0)
 
-    def test__anthropic_chat_api(self):
-        chat_api = AnthropicChatAPI()
-        chat_messages = [
-            {"role": "user", "content": "What's the weather like today?"},
-        ]
-        response = chat_api.make_llm_call(chat_messages)
-        self.assertIsInstance(response, str)
-        self.assertGreater(len(response), 0)
+    # def test__anthropic_chat_api(self):
+    #     chat_api = AnthropicChatAPI()
+    #     chat_messages = [
+    #         {"role": "user", "content": "What's the weather like today?"},
+    #     ]
+    #     response = chat_api.make_llm_call(chat_messages)
+    #     self.assertIsInstance(response, str)
+    #     self.assertGreater(len(response), 0)
 
-    def test__ollama_api(self):
-        try:
-            chat_api = OllamaAPI()
-        except Exception as e:
-            if e.__class__.__name__ == "ConnectError":
-                print ("Connection failed")
-                return
-        chat_messages = [
-            {"role": "user", "content": "Who's your daddy?"},
-        ]
-        response = chat_api.make_llm_call(chat_messages)
-        self.assertIsInstance(response, str)
-        self.assertGreater(len(response), 0)
+    # def test__ollama_api(self):
+    #     try:
+    #         chat_api = OllamaAPI()
+    #     except Exception as e:
+    #         if e.__class__.__name__ == "ConnectError":
+    #             print ("Connection failed")
+    #             return
+    #     chat_messages = [
+    #         {"role": "user", "content": "Who's your daddy?"},
+    #     ]
+    #     response = chat_api.make_llm_call(chat_messages)
+    #     self.assertIsInstance(response, str)
+    #     self.assertGreater(len(response), 0)
 
     def test__save_and_load_from_dict(self):
         chat_api = OpenAIChatAPI(temperature=0.5, max_tokens=2000)

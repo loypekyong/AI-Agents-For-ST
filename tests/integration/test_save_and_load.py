@@ -7,7 +7,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')
 
 from dsrag.knowledge_base import KnowledgeBase
 from dsrag.llm import OpenAIChatAPI
-from dsrag.embedding import VoyageAIEmbedding
+from dsrag.embedding import OpenAIEmbedding
 
 class TestSaveAndLoad(unittest.TestCase):
     def cleanup(self):
@@ -19,7 +19,7 @@ class TestSaveAndLoad(unittest.TestCase):
 
         # initialize a KnowledgeBase object
         auto_context_model = OpenAIChatAPI(model="gpt-4o-mini")
-        embedding_model = VoyageAIEmbedding(model="voyage-code-2")
+        embedding_model = OpenAIEmbedding(model="text-embedding-3-small")
         kb = KnowledgeBase(kb_id="test_kb", auto_context_model=auto_context_model, embedding_model=embedding_model, exists_ok=False)
 
         # load the KnowledgeBase object
@@ -27,7 +27,7 @@ class TestSaveAndLoad(unittest.TestCase):
 
         # verify that the KnowledgeBase object has the right parameters
         self.assertEqual(kb1.auto_context_model.model, "gpt-4o-mini")
-        self.assertEqual(kb1.embedding_model.model, "voyage-code-2")
+        self.assertEqual(kb1.embedding_model.model, "text-embedding-3-small")
 
         # delete the KnowledgeBase object
         kb1.delete()

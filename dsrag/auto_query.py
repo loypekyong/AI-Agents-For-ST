@@ -1,6 +1,6 @@
 import os
 import instructor
-from anthropic import Anthropic
+from openai import OpenAI
 from pydantic import BaseModel
 from typing import List
 
@@ -14,17 +14,17 @@ Each of the queries you generate will be used to search a knowledge base for inf
 
 
 def get_search_queries(user_input: str, auto_query_guidance: str = "", max_queries: int = 5):
-    base_url = os.environ.get("DSRAG_ANTHROPIC_BASE_URL", None)
+    base_url = os.environ.get("DSRAG_OPENAI_BASE_URL", None)
     if base_url is not None:
-        client = instructor.from_anthropic(Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"], base_url=base_url))
+        client = instructor.from_openai(OpenAI(api_key=os.environ["OPENAI_API_KEY"], base_url=base_url))
     else:
-        client = instructor.from_anthropic(Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"]))
+        client = instructor.from_openai(OpenAI(api_key=os.environ["OPENAI_API_KEY"]))
 
     class Queries(BaseModel):
         queries: List[str]
 
     resp = client.messages.create(
-        model="claude-3-sonnet-20240229",
+        model="gpt-4o-mini",
         max_tokens=400,
         temperature=0.2,
         system=SYSTEM_MESSAGE.format(max_queries=max_queries, auto_query_guidance=auto_query_guidance),

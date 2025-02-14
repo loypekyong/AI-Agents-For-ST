@@ -1,6 +1,8 @@
 import os
 import sys
 import unittest
+from dotenv import load_dotenv
+load_dotenv()
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../..')))
 from dsrag.auto_query import get_search_queries
