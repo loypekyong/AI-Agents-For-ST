@@ -67,9 +67,9 @@ class Neo4jConnection:
                 MERGE (r:Root {{
                     root_id: $root_id
                 }}) 
-                ON CREATE SET r.kb_id=$kb_id
+                ON CREATE SET r.root_id=$root_id, r.kb_id=$kb_id
                 '''
-                tx.run(root_query, kb_id=kb_id, root_id=doc_id_sections[0])
+                tx.run(root_query, root_id=doc_id_sections[0], kb_id=kb_id)
                 
 
                 ########################################################################
@@ -79,17 +79,26 @@ class Neo4jConnection:
                 MERGE (sc:Sector {{
                     sector_id: $sector_id
                 }}) 
-                ON CREATE SET sc.kb_id=$kb_id
+                ON CREATE SET sc.sector_id=$sector_id, sc.kb_id=$kb_id
                 '''
-                tx.run(sector_query, kb_id=kb_id, sector_id=doc_id_sections[1])
+                tx.run(sector_query, sector_id=doc_id_sections[1], kb_id=kb_id)
+
+                # relationship_query = f'''
+                # MATCH (r:Root {{kb_id: $kb_id}}),
+                #     (sc:Sector {{sector_id: $sector_id}}) 
+                # MERGE (r)-[:HAS_SECTOR]->(sc)
+
+                # '''
 
                 relationship_query = f'''
-                MATCH (r:Root {{kb_id: $kb_id}}),
+                MATCH (r:Root {{root_id: $root_id}}),
                     (sc:Sector {{sector_id: $sector_id}}) 
                 MERGE (r)-[:HAS_SECTOR]->(sc)
                 '''
-                tx.run(relationship_query, kb_id=kb_id, sector_id=doc_id_sections[1])
-            
+
+                # tx.run(relationship_query, kb_id=kb_id, sector_id=doc_id_sections[1])
+
+                tx.run(relationship_query, root_id=doc_id_sections[0], sector_id=doc_id_sections[1])
 
                 ########################################################################
 
@@ -98,64 +107,86 @@ class Neo4jConnection:
                 MERGE (dp:Department {{
                     department_id: $department_id
                 }}) 
-                ON CREATE SET dp.kb_id=$kb_id
+                ON CREATE SET dp.department_id = $department_id, dp.kb_id=$kb_id
                 '''
-                tx.run(department_query, kb_id=kb_id, department_id=doc_id_sections[2])
+                tx.run(department_query, department_id=doc_id_sections[2], kb_id=kb_id)
+
+                # relationship_query = f'''
+                # MATCH (sc:Sector {{kb_id: $kb_id}}),
+                #     (dp:Department {{department_id: $department_id}}) 
+                # MERGE (sc)-[:HAS_DEPARTMENT]->(dp)
+                # '''
+                # tx.run(relationship_query, kb_id=kb_id, department_id=doc_id_sections[2])
 
                 relationship_query = f'''
-                MATCH (sc:Sector {{kb_id: $kb_id}}),
+                MATCH (sc:Sector {{sector_id: $sector_id}}),
                     (dp:Department {{department_id: $department_id}}) 
                 MERGE (sc)-[:HAS_DEPARTMENT]->(dp)
                 '''
-                tx.run(relationship_query, kb_id=kb_id, department_id=doc_id_sections[2])
+                tx.run(relationship_query, sector_id=doc_id_sections[1], department_id=doc_id_sections[2])
             
 
-                ##########################################################################
+                # ##########################################################################
 
 
-                doc_query = f'''
-                MERGE (d:Document {{
-                    doc_id: $doc_id
-                }}) 
-                ON CREATE SET d.department_id=$department_id
-                '''
-                tx.run(doc_query, department_id=doc_id_sections[2], doc_id=doc_id.split(".")[0][:-4])
+                # doc_query = f'''
+                # MERGE (d:Document {{
+                #     doc_id: $doc_id
+                # }}) 
+                # ON CREATE SET d.department_id=$department_id
+                # '''
+                # tx.run(doc_query, department_id=doc_id_sections[2], doc_id=doc_id.split(".")[0][:-4])
 
-                relationship_query = f'''
-                MATCH (dp:Department {{department_id: $department_id}}),
-                    (d:Document {{doc_id: $doc_id}}) 
-                MERGE (dp)-[:HAS_DOCUMENT]->(d)
-                '''
-                tx.run(relationship_query, department_id=doc_id_sections[2], doc_id=doc_id.split(".")[0][:-4])
+                # relationship_query = f'''
+                # MATCH (dp:Department {{department_id: $department_id}}),
+                #     (d:Document {{doc_id: $doc_id}}) 
+                # MERGE (dp)-[:HAS_DOCUMENT]->(d)
+                # '''
+                # tx.run(relationship_query, department_id=doc_id_sections[2], doc_id=doc_id.split(".")[0][:-4])
 
-                #########################################################################
+                # #########################################################################
 
+
+                # year_query = f'''
+                # MERGE (y:Year {{
+                #     doc_year: $doc_year
+                # }}) 
+                # ON CREATE SET y.doc_year=$doc_year, y.doc_id=$doc_id
+                # '''
+                # tx.run(year_query, doc_id=doc_id.split(".")[0][:-4], doc_year=doc_year)
+        
+                # relationship_query = f'''
+                # MATCH (d:Document {{doc_id: $doc_id}}),
+                #     (y:Year {{doc_year: $doc_year}}) 
+                # MERGE (d)-[:IN_YEAR]->(y)
+                # '''
+                # tx.run(relationship_query, doc_id=doc_id.split(".")[0][:-4], doc_year=doc_year)
 
                 year_query = f'''
                 MERGE (y:Year {{
                     doc_year: $doc_year
                 }}) 
-                ON CREATE SET y.doc_id=$doc_id
+                ON CREATE SET y.doc_year=$doc_year
                 '''
-                tx.run(year_query, doc_id=doc_id.split(".")[0][:-4], doc_year=doc_year)
+                tx.run(year_query, doc_year=doc_year)
         
                 relationship_query = f'''
-                MATCH (d:Document {{doc_id: $doc_id}}),
+                MATCH (dp:Department {{department_id: $department_id}}),
                     (y:Year {{doc_year: $doc_year}}) 
-                MERGE (d)-[:IN_YEAR]->(y)
+                MERGE (dp)-[:IN_YEAR]->(y)
                 '''
-                tx.run(relationship_query, doc_id=doc_id.split(".")[0][:-4], doc_year=doc_year)
+                tx.run(relationship_query, department_id=doc_id_sections[2], doc_year=doc_year)
             
-                #########################################################################
+                # #########################################################################
 
             
                 doc_title = f'''
                 MERGE (dt:Document_title {{
                     doc_title: $doc_title
                 }}) 
-                ON CREATE SET dt.doc_id=$doc_id, dt.doc_year=$doc_year
+                ON CREATE SET dt.doc_year=$doc_year, dt.doc_id=$doc_id
                 '''
-                tx.run(doc_title, doc_id=doc_id.split(".")[0][:-4], doc_title=document_title, doc_year=doc_year)
+                tx.run(doc_title, doc_title=document_title, doc_year=doc_year, doc_id=doc_id.split(".")[0][:-4])
 
                 relationship_query = f'''
                 MATCH (y:Year {{doc_year: $doc_year}}),
@@ -166,7 +197,7 @@ class Neo4jConnection:
 
             
 
-                #########################################################################
+                # #########################################################################
 
 
                 doc_summ = f'''
@@ -175,7 +206,7 @@ class Neo4jConnection:
                 }}) 
                 ON CREATE SET ds.doc_title=$doc_title
                 '''
-                tx.run(doc_summ, doc_title=document_title, doc_summary=document_summary)
+                tx.run(doc_summ, doc_summary=document_summary, doc_title=document_title)
 
                 relationship_query = f'''
                 MATCH (dt:Document_title {{doc_title: $doc_title}}),
@@ -185,7 +216,7 @@ class Neo4jConnection:
                 tx.run(relationship_query, doc_title=document_title, doc_summary=document_summary)
             
 
-                ########################################################################
+                # ########################################################################
 
 
                 for entry in entries:
@@ -197,7 +228,7 @@ class Neo4jConnection:
                     MERGE (s:Section {{
                         sec_title: $sec_title
                     }})
-                    ON CREATE SET s.doc_summary=$doc_summary, s.doc_title=$doc_title
+                    ON CREATE SET s.sec_title=$sec_title, s.doc_summary=$doc_summary, s.doc_title=$doc_title
                     '''
                     tx.run(section_title, sec_title=sec_title, doc_summary=document_summary, doc_title=document_title)
 
@@ -210,7 +241,7 @@ class Neo4jConnection:
                     tx.run(relationship_query, sec_title=sec_title, doc_title=document_title)
 
 
-                    ########################################################################
+                #     ########################################################################
 
 
 if __name__ == "__main__":
