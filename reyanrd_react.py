@@ -52,14 +52,18 @@ client = OpenAI()
 
 question = "What is the revenue of AerSale Coorp 2022 and Satcom Cometech 2021"
 
-tools = [
-    Tool(
-        name=f"Tool{i+1}",
-        func=query_kb(sector_id=sector_ids[i], query=question, reranker=reranker),
-        description=f"Query a knowledge base to retrieve relevant info for companies related to {sector_ids[i]}."
-    )
-    for i in range(len(files_list))
-]
+def create_dynamic_tools(knowledge_bases, reranker):
+    tools = []
+    for kb in knowledge_bases:
+        tool = Tool(
+            name=f"search_{kb}",
+            func=lambda query, kb=kb: query_kb(kb, query, reranker),
+            description=f"Searches the {kb} knowledge base for relevant information."
+        )
+        tools.append(tool)
+    return tools
+
+tools = create_dynamic_tools(sector_ids, reranker)
 
 agent = initialize_agent(tools,client, agent="zero-shot-react-description", verbose=True)
 agent.run(question)
