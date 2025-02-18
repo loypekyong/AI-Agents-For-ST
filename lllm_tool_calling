@@ -10,9 +10,20 @@ import os, json
 
 load_dotenv()
 
+path = "./storage/metadata"   
+files_list = os.listdir(path)
+
+sector_ids = []
+
+for i in range(len(files_list)):
+    sector_id = os.listdir(path)[i][:-5]
+    sector_ids.append(sector_id)
+
+
+
 # Initialize OpenAI and KnowledgeBase
 llm = OpenAIChatAPI(model='gpt-4o-mini')
-reranker = NoReranker()
+reranker = CohereReranker()
 
 com_id = "CommAero"
 uss_id = "USS"
@@ -21,11 +32,11 @@ com_kb = KnowledgeBase(com_id, reranker=reranker, vector_db=ChromaDB(com_id), st
 uss_kb = KnowledgeBase(uss_id, reranker=reranker, vector_db=ChromaDB(uss_id), storage_directory="./storage")
 
 def query_com_kb(query):
-    document = com_kb.query(query)
+    document = com_kb.query([query])
     return document[0]["text"] if document else "No relevant information found."
 
 def query_uss_kb(query):
-    document = uss_kb.query(query)
+    document = uss_kb.query([query])
     return document[0]["text"] if document else "No relevant information found."
 
 tools = [{
