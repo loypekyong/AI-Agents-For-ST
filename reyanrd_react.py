@@ -76,11 +76,11 @@ Observation will be the result of running those actions.
 
 Your available actions are:
 
-query_com_kb:
+query_kb:
 - Example: query_com_kb: What is the revenue of SpiritAeroSystems 2022
 - Retrieves information about companies in the Commercial Aerospace Industry.
 
-query_uss_kb:
+query_kb:
 - Example: query_uss_kb: What is the revenue of Echostar 2021
 - Retrieves information about companies in the Universal Satellite Services Industry.
 
@@ -89,7 +89,7 @@ Example session:
 Question: What is the revenue of SpiritAeroSystems in 2022 and General Echostar in 2021
 Thought: I need to find the revenue of SpiritAeroSystems 2022 (Commercial Aerospace) and Echostar 2021 (Universal Satellite Services).
 
-Action: query_com_kb: SpiritAeroSystems 2022
+Action: query_kb: SpiritAeroSystems 2022
 PAUSE
 """
 
@@ -126,7 +126,7 @@ if completion.choices[0].message.tool_calls:
             # Execute the correct function
             if tool_function_name == f"query_{i}_kb":
                 print(f"Querying {i} KB: {tool_query}")
-                context = query_kb(tool_query)
+                context = query_kb(i,tool_query, reranker)
                 Found = True
             # elif tool_function_name == "query_uss_kb":
             #     print(f"Querying Universal Satellite Services KB: {tool_query}")
