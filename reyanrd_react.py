@@ -9,6 +9,7 @@ import openai
 import os
 from langchain.llms import OpenAI
 from langchain.agents import initialize_agent
+from langchain.chat_models import ChatOpenAI
 from langchain.tools import Tool
 # load API keys; you will need to obtain these if you haven't yet
 
@@ -19,7 +20,7 @@ import os, json
 load_dotenv()
 
 # Initialize OpenAI and KnowledgeBase
-llm = OpenAIChatAPI(model='gpt-4o-mini')
+llm = ChatOpenAI(model_name='gpt-4o-mini', temperature=0)
 reranker = CohereReranker()
 
 # com_id = "CommAero"
@@ -61,9 +62,9 @@ def create_dynamic_tools(knowledge_bases, reranker):
     return tools
 
 tools = create_dynamic_tools(sector_ids, reranker)
-
-client = OpenAI()
+ 
+client = OpenAI(model='gpt-4o-mini')
 question = "What is the revenue of Airbus 2022 and Echostar 2021"
 
-agent = initialize_agent(tools,client, agent="zero-shot-react-description", verbose=True)
+agent = initialize_agent(tools, llm=llm, agent="zero-shot-react-description", verbose=True)
 agent.run(question)
