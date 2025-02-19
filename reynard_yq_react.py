@@ -32,20 +32,11 @@ reranker = CohereReranker()
 # Assuming KnowledgeBase already exist
 def query_kb(sector_id, query, reranker):
     sector_kb = KnowledgeBase(sector_id, reranker=reranker, vector_db=ChromaDB(sector_id), storage_directory="~/AI-Agents-For-ST/storage")
-    document1 = "yq_node"
+    document1 = "chunks of the knwoeldge graph" # Function
+    query += "Additional information from knowledge graph: \n Based on the above query, take note of the document ID below and see if its relevant to the query else disregard anything below: \n" + document1 
     document2 = sector_kb.query(query)
-    title_yq = document1[0]["text"] 
-    text_py = "This part obtained via Relational Matrix, denoted as Vector_Text: \n" + document2[0]["text"]
 
-    if document1[0]["doc_id"] == document2[[0]["doc_id"]] and document1[0]["chunk_id"] == document2[[0]["chunk_id"]]:
-        return text_py
-    elif document1[0]["doc_id"] == document2[[0]["doc_id"]]:
-        # section_id = title_yq
-        # text1_yq = "This part obtained via Relational Matrix, denoted as Graph_Text: sector_kb + find section description based on section id
-        # return text1_yq + text_py
-        pass
-    else:
-        return text_py if document1 else "No relevant information found."
+    return document2[0]["text"] if document2 else "No relevant information found."
 
 # ReAct Automation
 
