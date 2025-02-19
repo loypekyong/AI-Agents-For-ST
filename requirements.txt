@@ -394,7 +394,7 @@ pygments==2.18.0
     # via
     #   dsrag (pyproject.toml)
     #   rich
-PyMuPDF==1.24.13
+pymupdf
     # via dsrag (pyproject.toml)
 pypika==0.48.9
     # via chromadb
