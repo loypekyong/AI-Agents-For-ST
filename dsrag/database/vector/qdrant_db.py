@@ -4,7 +4,7 @@ from dsrag.database.vector.types import ChunkMetadata, Vector, VectorSearchResul
 from dsrag.database.vector.db import VectorDB
 import numpy as np
 from typing import Optional
-from qdrant_client import QdrantClient, models
+# from qdrant_client import QdrantClient, models
 
 
 def convert_id(_id: str) -> str:

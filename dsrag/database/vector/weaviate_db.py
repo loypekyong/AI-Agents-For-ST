@@ -3,9 +3,9 @@ from dsrag.database.vector.types import ChunkMetadata, Vector, VectorSearchResul
 from dsrag.database.vector.db import VectorDB
 import numpy as np
 from typing import Optional
-import weaviate
-import weaviate.classes as wvc
-from weaviate.util import generate_uuid5
+# import weaviate
+# import weaviate.classes as wvc
+# from weaviate.util import generate_uuid5
 
 
 class WeaviateVectorDB(VectorDB):
