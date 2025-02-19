@@ -23,25 +23,15 @@ load_dotenv()
 llm = ChatOpenAI(model_name='gpt-4o-mini', temperature=0)
 reranker = CohereReranker()
 
-# com_id = "CommAero"
-# uss_id = "USS"
-
-# com_kb = KnowledgeBase(com_id, reranker=reranker, vector_db=ChromaDB(com_id), storage_directory="~/AI-Agents-For-ST/storage")
-# uss_kb = KnowledgeBase(uss_id, reranker=reranker, vector_db=ChromaDB(uss_id), storage_directory="~/AI-Agents-For-ST/storage")
-
 # Assuming KnowledgeBase already exist
 def query_kb(sector_id, query, reranker):
     sector_kb = KnowledgeBase(sector_id, reranker=reranker, vector_db=ChromaDB(sector_id), storage_directory="~/AI-Agents-For-ST/storage")
-    document = sector_kb.query(query)
+    document = sector_kb.query([query])
     return document[0]["text"] if document else "No relevant information found."
-
-# def query_uss_kb(query):
-#     document = uss_kb.query(query)
-#     return document[0]["text"] if document else "No relevant information found."
 
 # ReAct Automation
 
-path = "./storage/metadata"   
+path = "/home/user/AI-Agents-For-ST/storage/metadata"   
 files_list = os.listdir(path)
 
 sector_ids = []
