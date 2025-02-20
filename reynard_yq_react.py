@@ -3,6 +3,7 @@ from dsrag.llm import OpenAIChatAPI
 from dsrag.reranker import CohereReranker, NoReranker
 from dsrag.database.vector.chroma_db import ChromaDB
 from dsrag.document_parsing import extract_text_from_pdf
+import neo4j_tools
 
 
 import openai
@@ -59,6 +60,12 @@ def create_dynamic_tools(knowledge_bases, reranker):
         )
         tools.append(tool)
     return tools
+
+def kg_query(query):
+    graph = neo4j_tools.initialize_neo4j()
+    neo4j_results = neo4j_tools.query_neo4j(graph, query)
+    document = f"Knowledge Graph Results:\n{neo4j_results}"
+    return document
 
 tools = create_dynamic_tools(sector_ids, reranker)
  
