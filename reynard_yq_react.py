@@ -57,11 +57,11 @@ def answer(question):
             tools.append(tool)
         return tools
 
-    def kg_query(query):
-        graph = neo4j_tools.initialize_neo4j()
-        neo4j_results = neo4j_tools.query_neo4j(graph, query)
-        document = f"Knowledge Graph Results:\n{neo4j_results}"
-        return document
+def kg_query(query, llm, prompt):
+    graph = neo4j_tools.initialize_neo4j()
+    neo4j_results = neo4j_tools.query_neo4j(graph, query, llm, prompt)
+    document = f"Knowledge Graph Results:\n{neo4j_results}"
+    return document
 
     tools = create_dynamic_tools(sector_ids, reranker)
 
