@@ -1,3 +1,6 @@
+import os
+import sys
+
 from dsrag.knowledge_base import KnowledgeBase
 from dsrag.llm import OpenAIChatAPI
 from dsrag.reranker import CohereReranker, NoReranker
@@ -6,7 +9,6 @@ from dsrag.document_parsing import extract_text_from_pdf
 
 
 import openai
-import os
 from langchain.llms import OpenAI
 from langchain.agents import initialize_agent
 from langchain.chat_models import ChatOpenAI
@@ -31,7 +33,7 @@ def query_kb(sector_id, query, reranker):
 
 # ReAct Automation
 
-path = "/home/user/AI-Agents-For-ST/storage/metadata"   
+path = "./../storage/metadata"   
 files_list = os.listdir(path)
 
 sector_ids = []
@@ -51,10 +53,16 @@ def create_dynamic_tools(knowledge_bases, reranker):
         tools.append(tool)
     return tools
 
+def kg_query(query):
+    graph = neo4j_tools.initialize_neo4j()
+    neo4j_results = neo4j_tools.query_neo4j(graph, query)
+    document = f"Knowledge Graph Results:\n{neo4j_results}"
+    return document
+
 tools = create_dynamic_tools(sector_ids, reranker)
  
 client = OpenAI(model='gpt-4o-mini')
-question = "What is the revenue of Airbus 2022 and Echostar 2021"
+question = "What is the revenue of Echostar 2021 and WillisLease 2021?"
 
 agent = initialize_agent(tools, llm=llm, agent="zero-shot-react-description", verbose=True)
 agent.run(question)
