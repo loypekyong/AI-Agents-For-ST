@@ -13,6 +13,7 @@ from langchain.llms import OpenAI
 from langchain.agents import initialize_agent
 from langchain.chat_models import ChatOpenAI
 from langchain.tools import Tool
+from langchain.memory import ConversationBufferMemory
 # load API keys; you will need to obtain these if you haven't yet
 
 from dotenv import load_dotenv
@@ -54,9 +55,9 @@ def create_dynamic_tools(knowledge_bases, reranker):
     return tools
 
 tools = create_dynamic_tools(sector_ids, reranker)
- 
-client = OpenAI(model='gpt-4o-mini')
+memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+
 question = "What is the revenue of Echostar 2021 and WillisLease 2021?"
 
-agent = initialize_agent(tools, llm=llm, agent="zero-shot-react-description", verbose=True)
+agent = initialize_agent(tools, llm=llm, agent="chat-conversational-react-description",max_iterations=2, memory=memory, verbose=True)
 agent.run(question)
