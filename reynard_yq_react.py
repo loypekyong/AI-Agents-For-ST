@@ -8,10 +8,10 @@ import neo4j_tools
 
 import openai
 import os
-from langchain.llms import OpenAI
 from langchain.agents import initialize_agent
-from langchain.chat_models import ChatOpenAI
+from langchain_community.chat_models import ChatOpenAI
 from langchain.tools import Tool
+from langchain.callbacks.streaming_stdout_final_only import FinalStreamingStdOutCallbackHandler
 # load API keys; you will need to obtain these if you haven't yet
 
 from dotenv import load_dotenv
@@ -20,57 +20,56 @@ import os, json
 
 load_dotenv()
 
-# Initialize OpenAI and KnowledgeBase
-llm = ChatOpenAI(model_name='gpt-4o-mini', temperature=0)
-reranker = CohereReranker()
 
-# com_id = "CommAero"
-# uss_id = "USS"
+def answer(question):
+    # Initialize OpenAI and KnowledgeBase
+    llm = ChatOpenAI(model_name='gpt-4o-mini', streaming=True, temperature=0, callbacks=[FinalStreamingStdOutCallbackHandler])
+    reranker = CohereReranker()
 
-# com_kb = KnowledgeBase(com_id, reranker=reranker, vector_db=ChromaDB(com_id), storage_directory="~/AI-Agents-For-ST/storage")
-# uss_kb = KnowledgeBase(uss_id, reranker=reranker, vector_db=ChromaDB(uss_id), storage_directory="~/AI-Agents-For-ST/storage")
+    # Assuming KnowledgeBase already exist
+    def query_kb(sector_id, query, reranker):
+        sector_kb = KnowledgeBase(sector_id, reranker=reranker, vector_db=ChromaDB(sector_id), storage_directory="~/AI-Agents-For-ST/storage")
+        document1 = kg_query(query)
+        query += "Additional information from knowledge graph: \n Based on the above query, take note of the document ID below and see if its relevant to the query else disregard anything below: \n" + document1 
+        document2 = sector_kb.query(query)
 
-# Assuming KnowledgeBase already exist
-def query_kb(sector_id, query, reranker):
-    sector_kb = KnowledgeBase(sector_id, reranker=reranker, vector_db=ChromaDB(sector_id), storage_directory="~/AI-Agents-For-ST/storage")
-    document1 = kg_query(query)
-    query += "Additional information from knowledge graph: \n Based on the above query, take note of the document ID below and see if its relevant to the query else disregard anything below: \n" + document1 
-    document2 = sector_kb.query(query)
+        return document2[0]["text"] if document2 else "No relevant information found."
 
-    return document2[0]["text"] if document2 else "No relevant information found."
+    # ReAct Automation
 
-# ReAct Automation
+    path = "./storage/metadata"   
+    files_list = os.listdir(path)
 
-path = "./storage/metadata"   
-files_list = os.listdir(path)
+    sector_ids = []
 
-sector_ids = []
+    for i in range(len(files_list)):
+        sector_id = os.listdir(path)[i][:-5]
+        sector_ids.append(sector_id)
 
-for i in range(len(files_list)):
-    sector_id = os.listdir(path)[i][:-5]
-    sector_ids.append(sector_id)
+    def create_dynamic_tools(knowledge_bases, reranker):
+        tools = []
+        for kb in knowledge_bases:
+            tool = Tool(
+                name=f"search_{kb}",
+                func=lambda query, kb=kb: query_kb(kb, query, reranker),
+                description=f"Searches the {kb} knowledge base for relevant information."
+            )
+            tools.append(tool)
+        return tools
 
-def create_dynamic_tools(knowledge_bases, reranker):
-    tools = []
-    for kb in knowledge_bases:
-        tool = Tool(
-            name=f"search_{kb}",
-            func=lambda query, kb=kb: query_kb(kb, query, reranker),
-            description=f"Searches the {kb} knowledge base for relevant information."
-        )
-        tools.append(tool)
-    return tools
+    def kg_query(query):
+        graph = neo4j_tools.initialize_neo4j()
+        neo4j_results = neo4j_tools.query_neo4j(graph, query)
+        document = f"Knowledge Graph Results:\n{neo4j_results}"
+        return document
 
-def kg_query(query):
-    graph = neo4j_tools.initialize_neo4j()
-    neo4j_results = neo4j_tools.query_neo4j(graph, query)
-    document = f"Knowledge Graph Results:\n{neo4j_results}"
-    return document
+    tools = create_dynamic_tools(sector_ids, reranker)
 
-tools = create_dynamic_tools(sector_ids, reranker)
- 
-client = OpenAI(model='gpt-4o-mini')
-question = "What is the revenue of Airbus 2022 and Echostar 2021"
+    # question = "What is the revenue of Airbus 2022 and Echostar 2021"
 
-agent = initialize_agent(tools, llm=llm, agent="zero-shot-react-description", verbose=True)
-agent.run(question)
+    agent = initialize_agent(tools, llm=llm, agent="zero-shot-react-description", verbose=False)
+    agent.run(question)
+
+if __name__ == "__main__":
+    question = input("Enter your question: ")
+    answer(question)
