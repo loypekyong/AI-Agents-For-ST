@@ -23,41 +23,47 @@ import os, json
 load_dotenv()
 
 # Initialize OpenAI and KnowledgeBase
-llm = ChatOpenAI(model_name='gpt-4o-mini', temperature=0)
-reranker = CohereReranker()
+def response(question):
+    llm = ChatOpenAI(model_name='gpt-4o-mini', temperature=0)
+    reranker = CohereReranker()
 
-# Assuming KnowledgeBase already exist
-def query_kb(sector_id, query, reranker):
-    sector_kb = KnowledgeBase(sector_id, reranker=reranker, vector_db=ChromaDB(sector_id), storage_directory="~/AI-Agents-For-ST/storage")
-    document = sector_kb.query([query])
-    return document[0]["text"] if document else "No relevant information found."
+    # Assuming KnowledgeBase already exist
+    def query_kb(sector_id, query, reranker):
+        sector_kb = KnowledgeBase(sector_id, reranker=reranker, vector_db=ChromaDB(sector_id), storage_directory="~/AI-Agents-For-ST/storage")
+        document = sector_kb.query([query])
+        return document[0]["text"] if document else "No relevant information found."
 
-# ReAct Automation
+    # ReAct Automation
 
-path = "./../storage/metadata"   
-files_list = os.listdir(path)
+    path = "./../storage/metadata"   
+    files_list = os.listdir(path)
 
-sector_ids = []
+    sector_ids = []
 
-for i in range(len(files_list)):
-    sector_id = os.listdir(path)[i][:-5]
-    sector_ids.append(sector_id)
+    for i in range(len(files_list)):
+        sector_id = os.listdir(path)[i][:-5]
+        sector_ids.append(sector_id)
 
-def create_dynamic_tools(knowledge_bases, reranker):
-    tools = []
-    for kb in knowledge_bases:
-        tool = Tool(
-            name=f"search_{kb}",
-            func=lambda query, kb=kb: query_kb(kb, query, reranker),
-            description=f"Searches the {kb} knowledge base for relevant information."
-        )
-        tools.append(tool)
-    return tools
+    def create_dynamic_tools(knowledge_bases, reranker):
+        tools = []
+        for kb in knowledge_bases:
+            tool = Tool(
+                name=f"search_{kb}",
+                func=lambda query, kb=kb: query_kb(kb, query, reranker),
+                description=f"Searches the {kb} knowledge base for relevant information."
+            )
+            tools.append(tool)
+        return tools
 
-tools = create_dynamic_tools(sector_ids, reranker)
-memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
+    tools = create_dynamic_tools(sector_ids, reranker)
+    memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
 
-question = "What is the revenue of Echostar 2021 and WillisLease 2021?"
+    question = "What is the revenue of Echostar 2021 and WillisLease 2021?"
 
-agent = initialize_agent(tools, llm=llm, agent="chat-conversational-react-description",max_iterations=2, memory=memory, verbose=True)
-agent.run(question)
+    agent = initialize_agent(tools, llm=llm, agent="chat-conversational-react-description",max_iterations=2, memory=memory, verbose=True)
+    response = agent.run(question)
+    return response
+
+if __name__ == "__main__":
+    question = input("Enter your question: ")
+    response(question)
