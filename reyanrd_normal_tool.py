@@ -17,8 +17,8 @@ reranker = CohereReranker()
 # com_id = "CommAero"
 # uss_id = "USS"
 
-# com_kb = KnowledgeBase(com_id, reranker=reranker, vector_db=ChromaDB(com_id), storage_directory="~/AI-Agents-For-ST/storage")
-# uss_kb = KnowledgeBase(uss_id, reranker=reranker, vector_db=ChromaDB(uss_id), storage_directory="~/AI-Agents-For-ST/storage")
+com_kb = KnowledgeBase(com_id, reranker=reranker, vector_db=ChromaDB(com_id), storage_directory="~/AI-Agents-For-ST/storage")
+uss_kb = KnowledgeBase(uss_id, reranker=reranker, vector_db=ChromaDB(uss_id), storage_directory="~/AI-Agents-For-ST/storage")
 
 # Assuming KnowledgeBase already exist
 def query_kb(sector_id, query, reranker):
@@ -63,7 +63,7 @@ for i in sector_ids:
     tools.append(tool)
 
 client = OpenAI()
-question = "What is the revenue of Airbus 2022 and Echostar 2021"
+question = "What is the revenue of AerSalesCorp 2022 and Comtech 2021"
 
 prompt = """
 You are a financial analyst at a large investment firm. You have been asked to analyze the financial performance of a company.

@@ -3,7 +3,7 @@
     "description": "",
     "language": "en",
     "supp_id": "",
-    "created_on": 1730259930,
+    "created_on": 1740295705,
     "components": {
         "embedding_model": {
             "subclass_name": "OpenAIEmbedding",
@@ -27,7 +27,7 @@
         "chunk_db": {
             "subclass_name": "BasicChunkDB",
             "kb_id": "USS",
-            "storage_directory": "/home/user/AI-Agents-For-ST/storage"
+            "storage_directory": "/home/aravindnair/AI-Agents-For-ST/storage"
         }
     }
 }
