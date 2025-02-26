@@ -29,11 +29,7 @@ def generate_cypher_query(llm, query):
     return cypher_generator.run(query)
 
 
-def query_neo4j(graph, cypher_query, llm, prompt):
-    chain = LLMChain(
-        llm=llm,
-        prompt=prompt
-    )
-    generate_cypher_query = chain.run(cypher_query)
+def query_neo4j(graph, llm, prompt):
+    generate_cypher_query = generate_cypher_query(llm, prompt)
     results = graph.query(generate_cypher_query)
     return results

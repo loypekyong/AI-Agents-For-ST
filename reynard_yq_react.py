@@ -29,7 +29,7 @@ def answer(question):
     # Assuming KnowledgeBase already exist
     def query_kb(sector_id, query, reranker):
         sector_kb = KnowledgeBase(sector_id, reranker=reranker, vector_db=ChromaDB(sector_id), storage_directory="~/AI-Agents-For-ST/storage")
-        document1 = kg_query(query)
+        document1 = kg_query(llm, query)
         query += "Additional information from knowledge graph: \n Based on the above query, take note of the document ID below and see if its relevant to the query else disregard anything below: \n" + document1 
         document2 = sector_kb.query(query)
 
@@ -57,9 +57,9 @@ def answer(question):
             tools.append(tool)
         return tools
 
-    def kg_query(query, llm, prompt):
+    def kg_query(llm, prompt):
         graph = neo4j_tools.initialize_neo4j()
-        neo4j_results = neo4j_tools.query_neo4j(graph, query, llm, prompt)
+        neo4j_results = neo4j_tools.query_neo4j(graph, llm, prompt)
         document = f"Knowledge Graph Results:\n{neo4j_results}"
         return document
 
