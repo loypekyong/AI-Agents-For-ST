@@ -57,9 +57,9 @@ def answer(question):
             tools.append(tool)
         return tools
 
-    def kg_query(llm, prompt):
+    def kg_query(llm, query):
         graph = neo4j_tools.initialize_neo4j()
-        neo4j_results = neo4j_tools.query_neo4j(graph, llm, prompt)
+        neo4j_results = neo4j_tools.query_neo4j(graph, llm, query)
         document = f"Knowledge Graph Results:\n{neo4j_results}"
         return document
 

@@ -1,6 +1,7 @@
 from langchain.prompts import PromptTemplate
 from langchain.chains import LLMChain
-from langchain.graphs import Neo4jGraph
+# from langchain.graphs import Neo4jGraph
+from langchain_neo4j import Neo4jGraph, GraphCypherQAChain
 
 import os
 from dotenv import load_dotenv
@@ -14,22 +15,29 @@ OPENAI_API = os.getenv("OPENAI_API")
 
 def initialize_neo4j():
     return Neo4jGraph(
-        url=NEO4J_URI,  # Replace with your Neo4j URI
-        username=NEO4J_USERNAME,             # Replace with your Neo4j username
+        url=NEO4J_URI,
+        username=NEO4J_USERNAME,
         password=NEO4J_PASSWORD      
     )
 
 
-def generate_cypher_query(llm, query):
+def generate_cypher_query(llm, graph, query, cypher_prompt):
+    chain = GraphCypherQAChain.from_llm(
+        llm=llm, 
+        prompt=cypher_prompt,
+        graph=graph,
+        allow_dangerous_requests=True,
+        verbose=False,
+    )
+    return chain.run({"query": query})
+
+
+def query_neo4j(graph, llm, query):
     cypher_prompt = PromptTemplate(
         input_variables=["query"],
-        template="Given the user's query: {query}, generate a Cypher query to extract the relevant information from the Neo4j graph."
+        template=("You are a graph query assistant. Given the user's question: {query}, "
+                  "generate an appropriate Cypher query to retrieve the relevant data from the Neo4j graph. "
+                  "Note: You are strongly prohibited from generating queries that can result in permanent alteration of the original graph.")
     )
-    cypher_generator = LLMChain(llm=llm, prompt=cypher_prompt)
-    return cypher_generator.run(query)
-
-
-def query_neo4j(graph, llm, prompt):
-    generate_cypher_query = generate_cypher_query(llm, prompt)
-    results = graph.query(generate_cypher_query)
-    return results
+    res = generate_cypher_query(llm, graph, query, cypher_prompt)
+    return res
