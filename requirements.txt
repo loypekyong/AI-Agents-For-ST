@@ -234,6 +234,8 @@ jsonref==1.1.0
     # via instructor
 kubernetes==31.0.0
     # via chromadb
+langchain
+langchain-community
 langchain-core==0.2.12
     # via
     #   dsrag (pyproject.toml)
@@ -263,6 +265,7 @@ multidict==6.0.5
     #   aiohttp
     #   dsrag (pyproject.toml)
     #   yarl
+neo4j
 numpy==1.26.4
     # via
     #   chroma-hnswlib
@@ -584,4 +587,5 @@ Flask-Cors==5.0.0
 Flask-JWT-Extended==4.7.1
 Flask-Migrate==4.1.0
 Flask-SQLAlchemy==3.1.1
+psycopg2==2.9.10
 Werkzeug==3.1.3

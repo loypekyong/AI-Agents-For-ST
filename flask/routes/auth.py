@@ -34,7 +34,8 @@ def login():
     user = User.query.filter_by(email=email).first()
     if user and bcrypt.check_password_hash(user.password, password):
         # create access token which expires in 30 minutes
-        access_token = create_access_token(identity=str(user.id), expires_delta=timedelta(minutes=30))  
+        # access_token = create_access_token(identity=str(user.id), expires_delta=timedelta(minutes=30))  
+        access_token = create_access_token(identity=str(user.id), expires_delta=timedelta(hours=2))  
         return jsonify({"userId": user.id, "token": access_token}), 200
 
     return jsonify({"msg": "Invalid email or password!"}), 401

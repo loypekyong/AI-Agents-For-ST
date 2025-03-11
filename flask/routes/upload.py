@@ -5,7 +5,7 @@ from add_doc import Kb_add_doc, get_kb, get_file_as_id
 import os
 upload_bp = Blueprint('upload', __name__)
 
-UPLOAD_FOLDER = './uploads'
+UPLOAD_FOLDER = '/app/flask/uploads'
 
 # Function to check if file is of pdf format
 def allowed_file(filename):

@@ -22,7 +22,7 @@ llm = OpenAIChatAPI(model='gpt-4o-mini')
 reranker = CohereReranker()
 
 def get_kb(kb_id):
-    Kb = KnowledgeBase(kb_id, reranker = CohereReranker(), vector_db=ChromaDB(kb_id), storage_directory="~/AI-Agents-For-ST/storage")
+    Kb = KnowledgeBase(kb_id, reranker = CohereReranker(), vector_db=ChromaDB(kb_id), storage_directory="/app/storage")
     return Kb
 
 
@@ -31,6 +31,8 @@ def get_file_as_id(folder_path):
         return ValueError
     folder_name = folder_path.split('/')[-1]
     id = folder_name.split('.')[0]
+    id = id.split('_')
+    id = ' '.join(id)
     
     return id
 
@@ -39,6 +41,7 @@ USS_ID = "USS"
 
 def Kb_add_doc(Kb, file_path):
     id = get_file_as_id(file_path)
+    print(id)
     text = extract_text_from_pdf(file_path)
     Kb.add_document(doc_id=id, text=text[0])
     return Kb

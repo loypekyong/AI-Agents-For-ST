@@ -25,6 +25,8 @@ import os, json
 
 load_dotenv()
 
+STORAGE_DIR = "/app/storage"
+
 # Initialize OpenAI and KnowledgeBase
 def response(question):
     llm = ChatOpenAI(model_name='gpt-4o-mini', temperature=0)
@@ -32,14 +34,21 @@ def response(question):
 
     # Assuming KnowledgeBase already exist
     def query_kb(sector_id, query, reranker):
-        sector_kb = KnowledgeBase(sector_id, reranker=reranker, vector_db=ChromaDB(sector_id), storage_directory="~/AI-Agents-For-ST/storage")
+        sector_kb = KnowledgeBase(sector_id, reranker=reranker, vector_db=ChromaDB(sector_id), storage_directory=STORAGE_DIR)
         document = sector_kb.query([query])
-        return document[0]["text"] if document else "No relevant information found."
+        if document:
+            return document[0]["text"]
+        else:
+            sector_kb = KnowledgeBase(sector_id, reranker=NoReranker(), vector_db=ChromaDB(sector_id), storage_directory=STORAGE_DIR)
+            document = sector_kb.query([query])
+
+            return document[0]["text"] if document else "No relevant information found."
 
     # ReAct Automation
 
-    path = "./../storage/metadata"   
+    path = f"{STORAGE_DIR}/metadata"   
     files_list = os.listdir(path)
+    print(files_list)
 
     sector_ids = []
 
@@ -50,10 +59,11 @@ def response(question):
     def create_dynamic_tools(knowledge_bases, reranker):
         tools = []
         for kb in knowledge_bases:
+            print('next kb')
             tool = Tool(
                 name=f"search_{kb}",
                 func=lambda query, kb=kb: query_kb(kb, query, reranker),
-                description=f"Searches the {kb} knowledge base for relevant information."
+                description=f"Returns the relevant information for queries about {kb} companies."
             )
             tools.append(tool)
         return tools
