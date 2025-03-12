@@ -10,4 +10,4 @@ COPY . .
 
 EXPOSE 3001
 
-CMD ["python3", "flask/app.py"]
+CMD ["python3", "-u", "flask/app.py"]

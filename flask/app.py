@@ -7,16 +7,18 @@ from flask_jwt_extended import JWTManager
 import os
 from dotenv import load_dotenv
 from models import db
-from routes.auth import auth_bp
-from routes.message import message_bp
-from routes.chat import chat_bp
-from routes.upload import upload_bp
 
 # Load environment variables from .env file
 load_dotenv()
 
 # Initialize Flask application
 app = Flask(__name__)
+
+# import routes
+from routes.auth import auth_bp
+from routes.message import message_bp
+from routes.chat import chat_bp
+from routes.upload import upload_bp
 
 # Enable CORS for the React frontend
 CORS(app, supports_credentials=True)
@@ -36,6 +38,7 @@ app.register_blueprint(auth_bp, url_prefix='/auth')
 app.register_blueprint(chat_bp, url_prefix='/chat')
 app.register_blueprint(message_bp, url_prefix='/message')
 app.register_blueprint(upload_bp, url_prefix='/upload')
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0',port=3001, debug=True)

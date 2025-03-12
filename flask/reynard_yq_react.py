@@ -59,7 +59,7 @@ def answer(question):
             tool = Tool(
                 name=f"search_{kb}",
                 func=lambda query, kb=kb: query_kb(kb, query, reranker),
-                description=f"Searches the {kb} knowledge base for relevant information."
+                description=f"Answers relevant queries for and gives information related to companies in the {kb} sector"
             )
             tools.append(tool)
         return tools

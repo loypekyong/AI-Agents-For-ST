@@ -19,8 +19,10 @@ def get_files():
         os.makedirs(UPLOAD_FOLDER)
     files_list = []
     for root, dirs, files in os.walk(UPLOAD_FOLDER):
+        # split to get sector name
+        sector = root.split('/')[-1]
         for file in files:
-            files_list.append({'sector':root[10:], 'file':file})
+            files_list.append({'sector':sector, 'file':file})
     
     return jsonify(files_list), 200
 
@@ -41,7 +43,6 @@ def upload_file():
     sector = request.form.get('sector')
     # create or get knowledge base
     kb = get_kb(sector)
-    print('created kb')
 
     # get path of specific kb file folder
     sector_path = os.path.join(UPLOAD_FOLDER, sector)
@@ -83,10 +84,10 @@ def upload_file():
 @jwt_required()
 def delete_file(sector, file):
     if os.path.exists(os.path.join(UPLOAD_FOLDER, sector, file)):
-        print(sector, file)
         kb = get_kb(sector)
         # remove .pdf from file name and pass file id to be deleted from kb
-        kb.delete_document(file.split('.')[0])
+        id_ls = file.split('.')[0].split('_')
+        kb.delete_document(' '.join(id_ls))
         # remove pdf from local storage
         os.remove(os.path.join(UPLOAD_FOLDER, sector, file))
     else:

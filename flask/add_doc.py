@@ -1,8 +1,8 @@
 import sys
 import os
 # allow importing dsrag modules
-utils_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../'))
-sys.path.append(utils_dir)
+# utils_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../'))
+# sys.path.append(utils_dir)
 from dsrag.knowledge_base import KnowledgeBase
 from dsrag.llm import OpenAIChatAPI
 from dsrag.reranker import NoReranker, CohereReranker
