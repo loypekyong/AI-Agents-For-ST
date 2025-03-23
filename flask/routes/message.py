@@ -72,7 +72,7 @@ def send_response():
     #         yield data[i]  # Yield each character for streaming
 
 
-    return Response(response(data), content_type='text/event-stream')
+    return Response(response(data, 0), content_type='text/event-stream')
 
 @message_bp.route('/<int:chat_id>', methods=['POST'])
 @jwt_required()
