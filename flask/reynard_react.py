@@ -33,7 +33,8 @@ def response(question, llm_name=0):
     llm = ChatOpenAI(model_name='gpt-4o-mini', temperature=0) if llm_name == 0 else ChatCohere()
     reranker = CohereReranker()
 
-    doc_dict = {}
+    # dictionary to store source document name and text used in response
+    doc_dict = {"doc_id":'', "text":''}
 
     # Assuming KnowledgeBase already exist
     def query_kb(sector_id, query, reranker):
@@ -49,9 +50,10 @@ def response(question, llm_name=0):
             sector_kb = KnowledgeBase(sector_id, reranker=NoReranker(), vector_db=ChromaDB(sector_id), storage_directory=STORAGE_DIR)
             document = sector_kb.query([query])
             # save document source data to return later
-            doc_id_list = document[0]["doc_id"].split()
-            doc_dict["doc_id"] = '_'.join(doc_id_list)
-            doc_dict["text"] = document[0]["text"]
+            if document:
+                doc_id_list = document[0]["doc_id"].split()
+                doc_dict["doc_id"] = '_'.join(doc_id_list)
+                doc_dict["text"] = document[0]["text"]
             return document[0]["text"] if document else "No relevant information found."
 
     # ReAct Automation
@@ -87,7 +89,7 @@ def response(question, llm_name=0):
     response = agent.run(question)
     for chunk in response:
         yield chunk
-    yield f'||Source Document: {doc_dict["doc_id"]}\n\n {doc_dict["text"]}' if {doc_dict["doc_id"]!=''} else ''
+    yield f'||Source Document: {doc_dict["doc_id"]}\n\n {doc_dict["text"]}' if doc_dict["doc_id"]!='' else ''
 
 if __name__ == "__main__":
     question = input("Enter your question: ")

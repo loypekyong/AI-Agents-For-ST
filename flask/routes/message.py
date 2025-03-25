@@ -65,13 +65,6 @@ def load_older(chat_id):
 def send_response():
     data = request.get_json()['input']
 
-    # dummy response to test streaming
-    # def generate():
-    #     for i in range(len(data)):
-    #         time.sleep(0.1)  # Simulate processing time
-    #         yield data[i]  # Yield each character for streaming
-
-
     return Response(response(data, 0), content_type='text/event-stream')
 
 @message_bp.route('/<int:chat_id>', methods=['POST'])
@@ -87,7 +80,7 @@ def create_message(chat_id):
         return jsonify({"msg": "Failed to create message: " + str(e)}), 500
     return jsonify({'id': new_message.id, 'ai': new_message.ai, 'content': new_message.content, 'timestamp': new_message.timestamp, 'chat_id':new_message.chat_id}), 201
 
-@message_bp.route('/edit/<int:message_id>', methods=['POST'])
+@message_bp.route('/<int:message_id>', methods=['PUT'])
 @jwt_required()
 def modify_message(message_id):
     message = Message.query.get_or_404(message_id)
