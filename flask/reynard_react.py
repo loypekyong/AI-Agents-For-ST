@@ -10,6 +10,7 @@ from dsrag.llm import OpenAIChatAPI, AnthropicChatAPI
 from dsrag.reranker import CohereReranker, NoReranker
 from dsrag.database.vector.chroma_db import ChromaDB
 from dsrag.document_parsing import extract_text_from_pdf
+import neo4j_tools
 
 
 import openai
@@ -26,12 +27,12 @@ import os, json
 
 load_dotenv()
 
-STORAGE_DIR = "/app/storage" if os.environ.get("DOCKER") else "../storage"
+STORAGE_DIR = "../storage" 
 
 # Initialize OpenAI and KnowledgeBase
-def response(question, llm_name=0):
+def response(question, llm_name=0, reranker=0, use_graph = 1):
     llm = ChatOpenAI(model_name='gpt-4o-mini', temperature=0) if llm_name == 0 else ChatCohere()
-    reranker = CohereReranker()
+    reranker = CohereReranker() if reranker==0 else NoReranker()
 
     # dictionary to store source document name and text used in response
     doc_dict = {"doc_id":'', "text":''}
@@ -39,7 +40,13 @@ def response(question, llm_name=0):
     # Assuming KnowledgeBase already exist
     def query_kb(sector_id, query, reranker):
         sector_kb = KnowledgeBase(sector_id, reranker=reranker, vector_db=ChromaDB(sector_id), storage_directory=STORAGE_DIR)
-        document = sector_kb.query([query])
+        if use_graph == 0:
+            print("Graph usage = True")
+            document1 = kg_query(query, llm)
+            query += "Additional information from knowledge graph: \n Based on the above query, take note of the document ID below and see if its relevant to the query else disregard anything below: \n" + document1 
+            document = sector_kb.query([query])
+        else:
+            document = sector_kb.query([query])
         if document:
             # save document source data to return later
             doc_id_list = document[0]["doc_id"].split()
@@ -79,10 +86,15 @@ def response(question, llm_name=0):
             )
             tools.append(tool)
         return tools
+    
+    def kg_query(query, llm):
+        graph = neo4j_tools.initialize_neo4j()
+        neo4j_results = neo4j_tools.query_neo4j(graph, llm, query)
+        document = f"Knowledge Graph Results:\n{neo4j_results}"
+        return document
 
     tools = create_dynamic_tools(sector_ids, reranker)
     memory = ConversationBufferMemory(memory_key="chat_history", return_messages=True)
-
     # question = "What is the revenue of Echostar 2021 and WillisLease 2021?"
 
     agent = initialize_agent(tools, llm=llm, agent="chat-conversational-react-description",max_iterations=2, memory=memory, verbose=True)

@@ -64,8 +64,11 @@ def load_older(chat_id):
 @jwt_required()
 def send_response():
     data = request.get_json()['input']
+    llm = request.get_json()['llm']
+    reranker = request.get_json()['reranker']
+    graph = request.get_json()['graph']
 
-    return Response(response(data, 0), content_type='text/event-stream')
+    return Response(response(data, 0, reranker, graph), content_type='text/event-stream')
 
 @message_bp.route('/<int:chat_id>', methods=['POST'])
 @jwt_required()
