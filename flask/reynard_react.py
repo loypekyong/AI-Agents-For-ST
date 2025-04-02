@@ -29,7 +29,7 @@ load_dotenv()
 STORAGE_DIR = "../storage" 
 
 # Initialize OpenAI and KnowledgeBase
-def response(question, llm_name=0, reranker=0, use_graph = 1):
+def response(question, llm_name=0, reranker=0, use_graph = 0):
     llm = ChatOpenAI(model_name='gpt-4o-mini', temperature=0) if llm_name == 0 else ChatCohere()
     reranker = CohereReranker() if reranker==0 else NoReranker()
     use_graph = use_graph # boolean
@@ -44,7 +44,8 @@ def response(question, llm_name=0, reranker=0, use_graph = 1):
         if use_graph == 0:
             print("Graph usage = True")
             document1 = kg_query(query, llm)
-            query += "Additional information from knowledge graph: \n Based on the above query, take note of the document ID below and see if its relevant to the query else disregard anything below: \n" + document1 
+            additional_info = "Additional background provided from knowledge graph: \n" + document1 
+            query = additional_info + f"Remember, the original query is as such: {query}. Find the main information with reference to the background provided."
             document = sector_kb.query([query])
         else:
             document = sector_kb.query([query])

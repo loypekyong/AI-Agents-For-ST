@@ -30,5 +30,4 @@ os.environ['kb_id'] = args.kb_id
 # Run the Jupyter Notebook using nbconvert
 notebook_path = 'chunk_to_json.ipynb'  # Replace with the actual path to your notebook
 subprocess.run(['jupyter', 'nbconvert', '--to', 'notebook', '--execute', '--inplace', notebook_path])
-    
 
