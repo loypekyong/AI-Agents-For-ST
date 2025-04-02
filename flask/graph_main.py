@@ -1,6 +1,5 @@
 import subprocess
 import argparse
-import link_graph
 
 def main(arg1, arg2="data_new"):
     kb_id = arg1
