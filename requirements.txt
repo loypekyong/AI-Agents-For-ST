@@ -131,7 +131,7 @@ frozenlist==1.4.1
     #   aiohttp
     #   aiosignal
     #   dsrag (pyproject.toml)
-fsspec==2024.6.1
+fsspec>=2024.9.0,<2025.0.0 
     # via
     #   dsrag (pyproject.toml)
     #   huggingface-hub
@@ -234,15 +234,16 @@ jsonref==1.1.0
     # via instructor
 kubernetes==31.0.0
     # via chromadb
-langchain
-langchain-community
-langchain-core==0.2.12
+langchain>=0.3.21,<0.4.0
+langchain-neo4j>=0.4.0
+langchain-community>=0.3.20
+langchain-core>=0.3.8,<0.4.0 
     # via
     #   dsrag (pyproject.toml)
     #   langchain-text-splitters
-langchain-text-splitters==0.2.2
+langchain-text-splitters>=0.3.6,<1.0.0
     # via dsrag (pyproject.toml)
-langsmith==0.1.84
+langsmith>=0.1.125,<0.4
     # via
     #   dsrag (pyproject.toml)
     #   langchain-core
@@ -266,6 +267,7 @@ multidict==6.0.5
     #   dsrag (pyproject.toml)
     #   yarl
 neo4j
+neo4j-graphrag==1.6.0
 numpy==1.26.4
     # via
     #   chroma-hnswlib
@@ -416,7 +418,7 @@ pytz==2024.1
     # via
     #   dsrag (pyproject.toml)
     #   pandas
-pyyaml==6.0.1
+pyyaml>=6.0.2,<7.0.0
     # via
     #   chromadb
     #   dsrag (pyproject.toml)

@@ -3,7 +3,7 @@ from dsrag.llm import OpenAIChatAPI
 from dsrag.reranker import CohereReranker, NoReranker
 from dsrag.database.vector.chroma_db import ChromaDB
 from dsrag.document_parsing import extract_text_from_pdf
-
+import neo4j_tools
 
 import openai
 import os
@@ -26,8 +26,11 @@ reranker = CohereReranker()
 # Assuming KnowledgeBase already exist
 def query_kb(sector_id, query, reranker):
     sector_kb = KnowledgeBase(sector_id, reranker=reranker, vector_db=ChromaDB(sector_id), storage_directory="~/AI-Agents-For-ST/storage")
-    document = sector_kb.query([query])
-    return document[0]["text"] if document else "No relevant information found."
+    document1 = kg_query(query)
+    query += "Additional information from knowledge graph: \n Based on the above query, take note of the document ID below and see if its relevant to the query else disregard anything below: \n" + document1 
+    document2 = sector_kb.query([query])
+
+    return document2[0]["text"] if document2 else "No relevant information found."
 
 # ReAct Automation
 
@@ -50,6 +53,12 @@ def create_dynamic_tools(knowledge_bases, reranker):
         )
         tools.append(tool)
     return tools
+
+def kg_query(query):
+    graph = neo4j_tools.initialize_neo4j()
+    neo4j_results = neo4j_tools.query_neo4j(graph, query)
+    document = f"Knowledge Graph Results:\n{neo4j_results}"
+    return document
 
 tools = create_dynamic_tools(sector_ids, reranker)
  

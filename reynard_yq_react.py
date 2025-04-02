@@ -35,7 +35,7 @@ def query_kb(sector_id, query, reranker):
     sector_kb = KnowledgeBase(sector_id, reranker=reranker, vector_db=ChromaDB(sector_id), storage_directory="~/AI-Agents-For-ST/storage")
     document1 = kg_query(query)
     query += "Additional information from knowledge graph: \n Based on the above query, take note of the document ID below and see if its relevant to the query else disregard anything below: \n" + document1 
-    document2 = sector_kb.query(query)
+    document2 = sector_kb.query([query])
 
     return document2[0]["text"] if document2 else "No relevant information found."
 
