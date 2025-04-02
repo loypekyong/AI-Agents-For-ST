@@ -28,8 +28,8 @@ def generate_cypher_query(llm, graph, query, cypher_prompt):
         validate_cypher=True,
         graph=graph,
         allow_dangerous_requests=True,
-        verbose=False,
-        return_intermediate_steps=False,
+        verbose=True,
+        return_intermediate_steps=True,
         temperature=0,
     )
     return chain.run({"query": query})

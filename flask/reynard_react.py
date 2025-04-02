@@ -10,6 +10,7 @@ from dsrag.reranker import CohereReranker, NoReranker
 from dsrag.database.vector.chroma_db import ChromaDB
 from dsrag.document_parsing import extract_text_from_pdf
 import neo4j_tools
+import neo4j_tools
 
 import openai
 from langchain.llms import OpenAI
@@ -25,13 +26,13 @@ import os, json
 
 load_dotenv()
 
-STORAGE_DIR = "../storage" 
+STORAGE_DIR = "/app/storage" 
 
 # Initialize OpenAI and KnowledgeBase
 def response(question, llm_name=0, reranker=0, use_graph = 1):
     llm = ChatOpenAI(model_name='gpt-4o-mini', temperature=0) if llm_name == 0 else ChatCohere()
     reranker = CohereReranker() if reranker==0 else NoReranker()
-
+    use_graph = use_graph # boolean
     # dictionary to store source document name and text used in response
     doc_dict = {"doc_id":'', "text":''}
     # create response string to commit to db
@@ -40,7 +41,7 @@ def response(question, llm_name=0, reranker=0, use_graph = 1):
     # Assuming KnowledgeBase already exist
     def query_kb(sector_id, query, reranker):
         sector_kb = KnowledgeBase(sector_id, reranker=reranker, vector_db=ChromaDB(sector_id), storage_directory=STORAGE_DIR)
-        if use_graph == 0:
+        if use_graph == 1:
             print("Graph usage = True")
             document1 = kg_query(query, llm)
             query += "Additional information from knowledge graph: \n Based on the above query, take note of the document ID below and see if its relevant to the query else disregard anything below: \n" + document1 
