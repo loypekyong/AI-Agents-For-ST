@@ -45,7 +45,7 @@ def response(question, llm_name=0, reranker=0, use_graph = 0):
             print("Graph usage = True")
             document1 = kg_query(query, llm)
             additional_info = "Additional background provided from knowledge graph: \n" + document1 
-            query = additional_info + f"Remember, the original query is as such: {query}. Find the main information with reference the the background provided."
+            query = additional_info + f"Remember, the original query is as such: {query}. Find the main information with reference to the background provided."
             document = sector_kb.query([query])
         else:
             document = sector_kb.query([query])
