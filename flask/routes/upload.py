@@ -3,9 +3,10 @@ from flask_jwt_extended import jwt_required
 from werkzeug.utils import secure_filename
 from add_doc import Kb_add_doc, get_kb, get_file_as_id
 import os
+import graph_main
 upload_bp = Blueprint('upload', __name__)
 
-UPLOAD_FOLDER = "./uploads"
+UPLOAD_FOLDER = "/app/flask/uploads"
 
 # Function to check if file is of pdf format
 def allowed_file(filename):
@@ -43,6 +44,11 @@ def upload_file():
     sector = request.form.get('sector')
     # create or get knowledge base
     kb = get_kb(sector)
+    try:
+        kb_id = sector.lower() + "_kb_id"
+        graph_main.main(kb_id, "data_new") 
+    except:
+        print("Graph kb_id creation failed")
 
     # get path of specific kb file folder
     sector_path = os.path.join(UPLOAD_FOLDER, sector)
