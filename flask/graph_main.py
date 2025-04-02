@@ -7,15 +7,15 @@ def main(arg1, arg2="data_new"):
     folder_name = arg2
 
     print("Converting to json...")
-    subprocess.run(['python', 'chunk_to_json.py', '--kb_id', kb_id, '--folder_name', folder_name])
+    subprocess.run(['python', 'flask/chunk_to_json.py', '--kb_id', kb_id, '--folder_name', folder_name])
     print("Converted to json!")
 
     print("Creating graph...")
-    subprocess.run(['python', 'create_graph.py'])
+    subprocess.run(['python', 'flask/create_graph.py'])
     print("Graph created!")
     
     print("Linking graph...")
-    subprocess.run(['python', 'link_graph.py'])
+    subprocess.run(['python', 'flask/link_graph.py'])
     print("Graph linked!")
 
 if __name__ == "__main__":
