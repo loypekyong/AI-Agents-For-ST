@@ -1,10 +1,9 @@
 # routes/message_routes.py
-from flask import Blueprint, request, jsonify, Response
+from flask import Blueprint, request, jsonify, Response, copy_current_request_context, current_app
 from flask_jwt_extended import jwt_required, get_jwt, exceptions
 from models import db, Chat, Message
-import time
-import datetime
 from reynard_react import response
+import threading
 
 message_bp = Blueprint('message', __name__)
 
@@ -60,15 +59,34 @@ def load_older(chat_id):
     return older_messages
 
 
-@message_bp.route('/response', methods=['POST'])
+@message_bp.route('/response/<int:message_id>', methods=['POST'])
 @jwt_required()
-def send_response():
+def send_response(message_id):
     data = request.get_json()['input']
-    llm = request.get_json()['llm']
     reranker = request.get_json()['reranker']
     graph = request.get_json()['graph']
+    
+    response_string = ""
 
-    return Response(response(data, 0, reranker, graph), content_type='text/event-stream')
+    @copy_current_request_context
+    def commit_response_to_db(message_id, response_string):
+        with current_app.app_context():  # Ensure that the app context is active
+            message = Message.query.get_or_404(message_id)
+            message.content = response_string
+            db.session.commit()
+
+    def generate_response():
+        nonlocal response_string
+        for chunk in response(data, 0, reranker, graph):
+            yield chunk
+            response_string += chunk
+        print(response_string)
+        # Start the background task immediately
+        threading.Thread(target=commit_response_to_db, args=(message_id, response_string)).start()
+    
+
+    # Return the response to the client
+    return Response(generate_response(), content_type='text/event-stream')
 
 @message_bp.route('/<int:chat_id>', methods=['POST'])
 @jwt_required()
@@ -83,17 +101,6 @@ def create_message(chat_id):
         return jsonify({"msg": "Failed to create message: " + str(e)}), 500
     return jsonify({'id': new_message.id, 'ai': new_message.ai, 'content': new_message.content, 'timestamp': new_message.timestamp, 'chat_id':new_message.chat_id}), 201
 
-@message_bp.route('/<int:message_id>', methods=['PUT'])
-@jwt_required()
-def modify_message(message_id):
-    message = Message.query.get_or_404(message_id)
-    content = request.get_json()['content']
-    if content != None:
-        message.content = content
-        db.session.commit()
-        return jsonify({'id': message.id, 'ai': message.ai, 'content': message.content, 'timestamp': message.timestamp, 'chat_id':message.chat_id}), 200
-    else:
-        return 400
 
 @message_bp.route('/<int:message_id>', methods=['DELETE'])
 @jwt_required()

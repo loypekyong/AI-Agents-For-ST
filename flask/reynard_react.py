@@ -1,6 +1,5 @@
 import os
 import sys
-import time
 # allow importing dsrag modules
 utils_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../'))
 sys.path.append(utils_dir)
@@ -11,7 +10,6 @@ from dsrag.reranker import CohereReranker, NoReranker
 from dsrag.database.vector.chroma_db import ChromaDB
 from dsrag.document_parsing import extract_text_from_pdf
 import neo4j_tools
-
 
 import openai
 from langchain.llms import OpenAI
@@ -36,6 +34,8 @@ def response(question, llm_name=0, reranker=0, use_graph = 1):
 
     # dictionary to store source document name and text used in response
     doc_dict = {"doc_id":'', "text":''}
+    # create response string to commit to db
+    response_string = ""
 
     # Assuming KnowledgeBase already exist
     def query_kb(sector_id, query, reranker):
@@ -101,7 +101,11 @@ def response(question, llm_name=0, reranker=0, use_graph = 1):
     response = agent.run(question)
     for chunk in response:
         yield chunk
+        # add chunk to response string
+        response_string += chunk
+
     yield f'||Source Document: {doc_dict["doc_id"]}\n\n {doc_dict["text"]}' if doc_dict["doc_id"]!='' else ''
+
 
 if __name__ == "__main__":
     question = input("Enter your question: ")
