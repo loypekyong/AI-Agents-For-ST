@@ -232,6 +232,7 @@ jsonpointer==3.0.0
     #   jsonpatch
 jsonref==1.1.0
     # via instructor
+jupyter
 kubernetes==31.0.0
     # via chromadb
 langchain>=0.3.21,<0.4.0
@@ -251,6 +252,7 @@ markdown-it-py==3.0.0
     # via
     #   dsrag (pyproject.toml)
     #   rich
+matplotlib
 mdurl==0.1.2
     # via
     #   dsrag (pyproject.toml)

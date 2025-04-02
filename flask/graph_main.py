@@ -1,15 +1,22 @@
 import subprocess
 import argparse
+import link_graph
 
 def main(arg1, arg2="data_new"):
     kb_id = arg1
     folder_name = arg2
+
     print("Converting to json...")
     subprocess.run(['python', 'chunk_to_json.py', '--kb_id', kb_id, '--folder_name', folder_name])
-    print("Converted to json")
+    print("Converted to json!")
+
+    print("Creating graph...")
+    subprocess.run(['python', 'create_graph.py'])
+    print("Graph created!")
+    
     print("Linking graph...")
     subprocess.run(['python', 'link_graph.py'])
-    print("Graph linked")
+    print("Graph linked!")
 
 if __name__ == "__main__":
     # Set up argument parsing for main.py

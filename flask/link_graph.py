@@ -1,6 +1,5 @@
 import sys
 import os
-sys.path.append('C:/Users/limyo/anaconda3/envs/dsrag/Lib/site-packages/neo4j')
 from neo4j import GraphDatabase
 from dotenv import load_dotenv
 load_dotenv()
