@@ -80,7 +80,6 @@ def send_response(message_id):
         for chunk in response(data, 0, reranker, graph):
             yield chunk
             response_string += chunk
-        print(response_string)
         # Start the background task immediately
         threading.Thread(target=commit_response_to_db, args=(message_id, response_string)).start()
     

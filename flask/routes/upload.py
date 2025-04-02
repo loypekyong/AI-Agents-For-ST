@@ -6,7 +6,7 @@ import os
 import graph_main
 upload_bp = Blueprint('upload', __name__)
 
-UPLOAD_FOLDER = "/app/flask/uploads"
+UPLOAD_FOLDER = "./uploads"
 
 # Function to check if file is of pdf format
 def allowed_file(filename):

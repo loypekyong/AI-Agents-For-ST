@@ -26,7 +26,7 @@ import os, json
 
 load_dotenv()
 
-STORAGE_DIR = "/app/storage" 
+STORAGE_DIR = "../storage" 
 
 # Initialize OpenAI and KnowledgeBase
 def response(question, llm_name=0, reranker=0, use_graph = 1):
@@ -41,7 +41,7 @@ def response(question, llm_name=0, reranker=0, use_graph = 1):
     # Assuming KnowledgeBase already exist
     def query_kb(sector_id, query, reranker):
         sector_kb = KnowledgeBase(sector_id, reranker=reranker, vector_db=ChromaDB(sector_id), storage_directory=STORAGE_DIR)
-        if use_graph == 1:
+        if use_graph == 0:
             print("Graph usage = True")
             document1 = kg_query(query, llm)
             query += "Additional information from knowledge graph: \n Based on the above query, take note of the document ID below and see if its relevant to the query else disregard anything below: \n" + document1 
