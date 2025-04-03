@@ -42,11 +42,10 @@ def get_sectors():
 def upload_file():
     
     sector = request.form.get('sector')
+    kb_id = sector.lower() + "_kb_id"
     # create or get knowledge base
-    kb = get_kb(sector)
+    kb = get_kb(kb_id)
     try:
-        print("10c2eiun0in0i2nicv", sector)
-        kb_id = sector.lower() + "_kb_id"
         graph_main.main(kb_id, sector)
     except:
         print("Graph kb_id creation failed")

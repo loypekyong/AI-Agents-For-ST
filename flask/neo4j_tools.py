@@ -12,6 +12,7 @@ OPENAI_API = os.getenv("OPENAI_API")
 
 json_filenames = [f for f in os.listdir("/app/data_new/") if f.endswith('.json')]
 print(json_filenames)
+limit = 10
 
 def initialize_neo4j():
     return Neo4jGraph(
@@ -51,7 +52,7 @@ def query_neo4j(graph, llm, query):
         - Pick out words in the original query that can be found in the `section_source` attributes provided below for use in searching. 
         - Focus on retrieving `sec_chunks` related to company information with keywords like 'revenue', 'income', or 'earnings'.
         - [Optional] Given a key from the initial query, you can come up with similar meaning words to help with the search. Like how we can also use 'income' and 'earnings' from the original word 'revenue'. 
-        - Limit the first result to 1 node based on strictly related departments, sectors, and other constraints, then limit the second results to 5 related nodes.
+        - Limit the first result to 1 node based on strictly related departments, sectors, and other constraints, then limit the second results to {limit} related nodes.
         - Ensure the query matches the schema and uses only valid properties.
         - Return the details of the nodes and their `section_source` attribute instead of `doc_id`.
         - Order the final results by `section_source`.
@@ -59,7 +60,7 @@ def query_neo4j(graph, llm, query):
         Given the user's question: '{query}', the graph schema: '{graph.schema}', and the naming scheme for the original file names and `section_source` attribute in 'Section': {json_filenames}, generate a Cypher query following the example's structure exactly. Ensure:
         - The `WHERE` clause prioritizes `kb_id` and uses `CONTAINS` for `sec_chunks`, and the `section_source` attribute to limit the scope within documents of the same IDs if and only if applicable.
         - Use 'sector_id', 'department_id', or 'year' as an empty string ('') when not explicitly provided.
-        - Final results are limited to 5 nodes.
+        - Final results are limited to {limit} nodes.
         - The query matches the schema faithfully.
 
         Do NOT deviate from the example structure or introduce properties not in the schema.
@@ -82,7 +83,7 @@ def query_neo4j(graph, llm, query):
         WITH section, collect(related) AS related_sections
         RETURN section AS primary_section, [r IN related_sections | r.section_source] AS related_section_sources
         ORDER BY section.section_source
-        LIMIT 5
+        LIMIT {limit}
         '''
 
         If some fields are missing, and we know it is about USS, Viasat only, we can use:
@@ -99,7 +100,7 @@ def query_neo4j(graph, llm, query):
         WITH section, collect(related) AS related_sections
         RETURN section AS primary_section, [r IN related_sections | r.section_source] AS related_section_sources
         ORDER BY section.section_source
-        LIMIT 5
+        LIMIT {limit}
         '''
     """
     gen_cypher = generate_cypher_query(llm, graph, query, cypher_prompt)
