@@ -10,9 +10,16 @@ NEO4J_USERNAME = os.getenv("NEO4J_USERNAME")
 NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD")  
 OPENAI_API = os.getenv("OPENAI_API")
 
-json_filenames = [f for f in os.listdir("/app/data_new/") if f.endswith('.json')]
+json_filenames = []
+uploads_dir = "/app/flask/uploads"
+
+for root, dirs, files in os.walk(uploads_dir):
+    for f in files:
+        if f.endswith('.json'):
+            json_filenames.append(os.path.join(root, f))
+
 print(json_filenames)
-limit = 10
+limit = 5
 
 def initialize_neo4j():
     return Neo4jGraph(
@@ -86,12 +93,12 @@ def query_neo4j(graph, llm, query):
         LIMIT {limit}
         '''
 
-        If some fields are missing, and we know it is about USS, Viasat only, we can use:
+        If some fields are missing, and we know it is about USS, Gilat only (asking about any USS Gilat documents):
         '''
         MATCH (root:Root)-[:HAS_SECTOR]->(:Sector)-[:HAS_DEPARTMENT]->(dept:Department)-[:IN_YEAR]->(year:Year)-[:COVERS]->(:Document_title)-[:HAS_SUMMARY]->(:Document_summ)-[:HAS_SECTION_TITLE]->(section:Section)
         WHERE dept.kb_id = 'uss_kb_id'
             AND (toLower(section.section_source) CONTAINS 'uss' OR 'uss' IS NULL)
-            AND (toLower(section.section_source) CONTAINS 'viasat' OR 'viasat' IS NULL)
+            AND (toLower(section.section_source) CONTAINS 'gilat' OR 'gilat' IS NULL)
             AND (toLower(section.sec_chunks) CONTAINS 'revenue' OR toLower(section.sec_chunks) CONTAINS 'income' OR toLower(section.sec_chunks) CONTAINS 'earnings')
             
         WITH section

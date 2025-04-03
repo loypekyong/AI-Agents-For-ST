@@ -92,7 +92,15 @@ def response(question, llm_name=0, reranker=0, use_graph = 0):
     def kg_query(query, llm):
         graph = neo4j_tools.initialize_neo4j()
         neo4j_results = neo4j_tools.query_neo4j(graph, llm, query)
-        document = f"Knowledge Graph Results:\n{neo4j_results}"
+        reformatted_data = []
+
+        for section_source, sections in neo4j_results.items():
+            for section in sections:
+                reformatted_data.append({
+                    'section_source': section_source,
+                    'sec_chunks': section['sec_chunks']
+                })
+        document = f"Knowledge Graph Results:\n{reformatted_data}"
         return document
 
     tools = create_dynamic_tools(sector_ids, reranker)
