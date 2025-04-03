@@ -2,7 +2,8 @@ import sys
 import os
 from neo4j import GraphDatabase
 from dotenv import load_dotenv
-load_dotenv()
+
+load_dotenv(dotenv_path="../.env")
 
 class Neo4jConnection:
     def __init__(self, uri, user, password):

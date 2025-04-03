@@ -1,5 +1,5 @@
-import sys
 import os
+import sys
 import shutil
 from neo4j import GraphDatabase
 import json
