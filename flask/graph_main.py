@@ -1,7 +1,5 @@
 import subprocess
 import argparse
-import os
-import sys
 
 def main(arg1, arg2):
     kb_id = arg1
