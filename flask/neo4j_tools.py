@@ -125,5 +125,8 @@ def query_neo4j(graph, llm, query):
         if section_source not in grouped_sections:
             grouped_sections[section_source] = []
         grouped_sections[section_source].append(primary_section)
-        res = grouped_sections
-    return res
+    
+    if grouped_sections == {}:
+        return res
+    else:
+        return grouped_sections
