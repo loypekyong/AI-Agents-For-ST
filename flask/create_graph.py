@@ -1,5 +1,4 @@
 import os
-import sys
 import shutil
 from neo4j import GraphDatabase
 import json
@@ -176,6 +175,12 @@ class Neo4jConnection:
 
                 section_source = kb_id + ":" + doc_id_sections[1] + ":" + doc_id_sections[2] + ":" + doc_year
                 for entry in entries:
+                    # Check for the required keys
+                    required_keys = ['kb_id', 'section_title', 'chunk_text']
+                    for key in required_keys:
+                        if key not in entry:
+                            raise KeyError(f"'{key}' not found in entry: {entry}")
+                    
                     # Create Section Node
                     sec_title = entry["section_title"]
                     sec_chunks = entry["chunk_text"]
@@ -200,7 +205,6 @@ class Neo4jConnection:
                     MERGE (ds)-[:HAS_SECTION_TITLE]->(s)
                     '''
                     tx.run(relationship_query, sec_title=sec_title, doc_summary=document_summary, section_source=section_source)
-
 
                 #     ########################################################################
 
