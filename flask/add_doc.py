@@ -44,7 +44,6 @@ USS_ID = "USS"
 
 def Kb_add_doc(Kb, file_path):
     id = get_file_as_id(file_path)
-    print(id)
     text = extract_text_from_pdf(file_path)
     Kb.add_document(doc_id=id, text=text[0])
     return Kb

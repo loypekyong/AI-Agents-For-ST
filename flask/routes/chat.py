@@ -20,10 +20,19 @@ def create_chat():
 @chat_bp.route('/<int:chat_id>', methods=['DELETE'])
 @jwt_required()
 def delete_chat(chat_id):
+    payload = get_jwt()
+    user_id = payload['sub']  # Get the user ID from the JWT
+
     chat = Chat.query.get_or_404(chat_id)
+    
+    # Check if the user is the owner of the chat
+    if str(chat.user_id) != user_id:
+        return jsonify({"msg": "You do not have permission to delete this chat."}), 403
+
     # Delete associated messages first
     for message in chat.messages:
         db.session.delete(message)
+    
     db.session.delete(chat)
     db.session.commit()
     return jsonify({"msg": "Chat deleted successfully!"}), 200

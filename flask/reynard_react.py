@@ -26,7 +26,7 @@ import os, json
 
 load_dotenv()
 
-STORAGE_DIR = "/app/storage" 
+STORAGE_DIR = "../storage" 
 
 # Initialize OpenAI and KnowledgeBase
 def response(question, llm_name=0, reranker=0, use_graph = 0):
