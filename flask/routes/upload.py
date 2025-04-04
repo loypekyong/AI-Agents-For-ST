@@ -1,12 +1,10 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from flask_jwt_extended import jwt_required
 from werkzeug.utils import secure_filename
 from add_doc import Kb_add_doc, get_kb, get_file_as_id
 import os
 import graph_main
 upload_bp = Blueprint('upload', __name__)
-
-UPLOAD_FOLDER = "./uploads"
 
 # Function to check if file is of pdf format
 def allowed_file(filename):
@@ -15,6 +13,7 @@ def allowed_file(filename):
 @upload_bp.route('/', methods=['GET'])
 @jwt_required()
 def get_files():
+    UPLOAD_FOLDER = current_app.config['UPLOAD_FOLDER']
     # create upload folder if it doesn't exist
     if not os.path.exists(UPLOAD_FOLDER):
         os.makedirs(UPLOAD_FOLDER)
@@ -30,6 +29,7 @@ def get_files():
 @upload_bp.route('/sectors', methods=['GET'])
 @jwt_required()
 def get_sectors():
+    UPLOAD_FOLDER = current_app.config['UPLOAD_FOLDER']
     # create upload folder if it doesn't exist
     if not os.path.exists(UPLOAD_FOLDER):
         os.makedirs(UPLOAD_FOLDER)
@@ -37,18 +37,19 @@ def get_sectors():
     
     return jsonify(sectors), 200
 
-@upload_bp.route('/scan', methods=['POST'])
+@upload_bp.route('/', methods=['POST'])
 @jwt_required()
 def upload_file():
+    UPLOAD_FOLDER = current_app.config['UPLOAD_FOLDER']
     
     sector = request.form.get('sector')
     # create or get knowledge base
     kb = get_kb(sector)
-    try:
-        kb_id = sector.lower() + "_kb_id"
-        graph_main.main(kb_id, "data_new") 
-    except:
-        print("Graph kb_id creation failed")
+    # try:
+    #     kb_id = sector.lower() + "_kb_id"
+    #     graph_main.main(kb_id, "data_new") 
+    # except Exception as e:
+    #     print("Graph kb_id creation failed:", e)
 
     # get path of specific kb file folder
     sector_path = os.path.join(UPLOAD_FOLDER, sector)
@@ -75,7 +76,6 @@ def upload_file():
                 # save file to local storage
                 file.save(os.path.join(sector_path, filename))
                 # add file to knowledge base
-                print('adding doc')
                 Kb_add_doc(kb, os.path.join(sector_path, filename))
                 uploaded_filenames.append({'sector':sector, 'file': filename})
             
@@ -83,12 +83,16 @@ def upload_file():
                 # remove file if kb failed to add
                 os.remove(os.path.join(sector_path, filename))
                 return f'{filename} could not be added', 500
+        else:
+            return 'Invalid file type', 400
 
     return jsonify({"filenames": uploaded_filenames}), 200
 
 @upload_bp.route('/<sector>/<file>', methods=['DELETE'])
 @jwt_required()
 def delete_file(sector, file):
+    UPLOAD_FOLDER = current_app.config['UPLOAD_FOLDER']
+
     if os.path.exists(os.path.join(UPLOAD_FOLDER, sector, file)):
         kb = get_kb(sector)
         # remove .pdf from file name and pass file id to be deleted from kb

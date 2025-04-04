@@ -10,7 +10,7 @@ NEO4J_USERNAME = os.getenv("NEO4J_USERNAME")
 NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD")  
 OPENAI_API = os.getenv("OPENAI_API")
 
-json_filenames = [f for f in os.listdir("/app/data_new/") if f.endswith('.json')]
+json_filenames = [f for f in os.listdir("../data_new/") if f.endswith('.json')]
 print(json_filenames)
 
 def initialize_neo4j():

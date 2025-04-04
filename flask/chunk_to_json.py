@@ -2,7 +2,6 @@ import sys
 import subprocess
 import os
 import argparse
-from dsrag.knowledge_base import KnowledgeBase
 
 parser = argparse.ArgumentParser(description='Run Jupyter Notebook for chunking.')
 parser.add_argument('--kb_id', type=str, default='temp', help='Name of kb (kb_id)')

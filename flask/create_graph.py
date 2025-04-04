@@ -212,8 +212,8 @@ if __name__ == "__main__":
 
     connection = Neo4jConnection(uri, user, password)
 
-    directory_path = 'data_new/'  # Source directory
-    completed_directory = 'data_completed/'  # Destination directory
+    directory_path = '../data_new/'  # Source directory
+    completed_directory = '../data_completed/'  # Destination directory
     data = connection.load_json_files_from_directory(directory_path)
 
     try:

@@ -32,31 +32,29 @@ def get_chats():
         
         return jsonify({"messagesDict": messagesDict, "chatPreviews": chatPreviews}), 200
 
-    except exceptions.ExpiredSignatureError:
-        return jsonify({"msg": "Token has expired."}), 401
-    except exceptions.InvalidTokenError:
-        return jsonify({"msg": "Invalid token."}), 401
     except Exception as e:
         return jsonify({"msg": "An error occurred: " + str(e)}), 500
     
 @message_bp.route('/older/<int:chat_id>', methods=['POST'])
 @jwt_required()
 def load_older(chat_id):
-    data = request.get_json()
-    before_timestamp = data['before_timestamp']
-    print(before_timestamp)
-    
-    older_messages = (
-        db.session.query(Message)
-        .filter(Message.chat_id == chat_id)
-        .filter(Message.timestamp < before_timestamp)  # Filter messages older than the given timestamp
-        .order_by(Message.timestamp.desc())  # Sort in descending order
-        .limit(10)
-        .all()
-    )
-    older_messages.sort(key=lambda msg: msg.timestamp)
-    older_messages = [{'id': message.id, 'ai': message.ai, 'content': message.content, 'timestamp': message.timestamp, 'chat_id' : message.chat_id} for message in older_messages]
-    return older_messages
+    try:
+        data = request.get_json()
+        before_timestamp = data['before_timestamp']
+
+        older_messages = (
+            db.session.query(Message)
+            .filter(Message.chat_id == chat_id)
+            .filter(Message.timestamp < before_timestamp)  # Filter messages older than the given timestamp
+            .order_by(Message.timestamp.desc())  # Sort in descending order
+            .limit(10)
+            .all()
+        )
+        older_messages.sort(key=lambda msg: msg.timestamp)
+        older_messages = [{'id': message.id, 'ai': message.ai, 'content': message.content, 'timestamp': message.timestamp, 'chat_id' : message.chat_id} for message in older_messages]
+        return older_messages
+    except Exception as e:
+        return jsonify({"msg": "An error occurred: " + str(e)}), 500
 
 
 @message_bp.route('/response/<int:message_id>', methods=['POST'])
