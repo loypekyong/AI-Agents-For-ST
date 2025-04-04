@@ -4,6 +4,8 @@ import unittest
 from unittest.mock import patch, mock_open
 import shutil
 
+utils_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '../'))
+sys.path.append(utils_dir)
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../flask')))
 from create_graph import Neo4jConnection
 
