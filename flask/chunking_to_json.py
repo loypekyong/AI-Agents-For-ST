@@ -73,6 +73,11 @@ def main():
     vector_storage_directory = "/app/Dataset/storage"
     json_path = "data_new/"
 
+    # # For benchmarking
+    # pdf_folder = 'benchmark\\custom_pdfs'
+    # vector_storage_directory = "benchmark\\Dataset\\storage"
+    # json_path = "benchmark\\data_new\\"
+
     print("Starting chunking to json...")
     parser = argparse.ArgumentParser(description='Run Jupyter Notebook for chunking.')
     parser.add_argument('--kb_id', type=str, default='temp', help='Name of kb (kb_id)')

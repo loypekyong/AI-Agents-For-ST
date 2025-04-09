@@ -1,5 +1,6 @@
 from langchain.prompts import PromptTemplate
 from langchain_neo4j import Neo4jGraph, GraphCypherQAChain
+from neo4j import GraphDatabase
 
 import os
 from dotenv import load_dotenv
@@ -20,6 +21,17 @@ for root, dirs, files in os.walk(uploads_dir):
 
 print(json_filenames)
 limit = 5
+class Neo4jConnection:
+    def __init__(self, uri, user, password):
+        self.driver = GraphDatabase.driver(uri, auth=(user, password))
+        try:
+            self.driver.verify_connectivity()
+            print("Successfully connected to Neo4j")
+        except Exception as e:
+            print("Connection failed:", e)
+
+    def close(self):
+        self.driver.close()
 
 def initialize_neo4j():
     return Neo4jGraph(
@@ -78,13 +90,13 @@ def query_neo4j(graph, llm, query):
         '''
         MATCH (root:Root)-[:HAS_SECTOR]->(:Sector)-[:HAS_DEPARTMENT]->(dept:Department)-[:IN_YEAR]->(year:Year)-[:COVERS]->(:Document_title)-[:HAS_SUMMARY]->(:Document_summ)-[:HAS_SECTION_TITLE]->(section:Section)
         WHERE dept.kb_id = 'uss_kb_id'
-            AND (toLower(section.section_source) CONTAINS 'uss' OR 'uss' IS NULL)
-            AND (toLower(section.section_source) CONTAINS 'satcom' OR 'satcom' IS NULL)
-            AND (toLower(section.section_source) CONTAINS 'viasat' OR 'viasat' IS NULL)
+            AND (toLower(section.section_source) CONTAINS 'uss')
+            AND (toLower(section.section_source) CONTAINS 'satcom')
+            AND (toLower(section.section_source) CONTAINS 'viasat')
             AND year.doc_year = '2022'
             AND (toLower(section.sec_chunks) CONTAINS 'revenue' OR toLower(section.sec_chunks) CONTAINS 'income' OR toLower(section.sec_chunks) CONTAINS 'earnings')
-            
         WITH section
+        LIMIT 1
 
         OPTIONAL MATCH (section)-[:IS_RELATED_TO]->(related:Section)
         WITH section, collect(related) AS related_sections
@@ -102,6 +114,7 @@ def query_neo4j(graph, llm, query):
             AND (toLower(section.sec_chunks) CONTAINS 'revenue' OR toLower(section.sec_chunks) CONTAINS 'income' OR toLower(section.sec_chunks) CONTAINS 'earnings')
             
         WITH section
+        LIMIT 1
 
         OPTIONAL MATCH (section)-[:IS_RELATED_TO]->(related:Section)
         WITH section, collect(related) AS related_sections
@@ -110,23 +123,34 @@ def query_neo4j(graph, llm, query):
         LIMIT {limit}
         '''
     """
-    gen_cypher = generate_cypher_query(llm, graph, query, cypher_prompt)
-    lines = gen_cypher.strip().split('\n') # Split into lines and strip whitespace
-    cleaned_gen_q = '\n'.join(lines[1:-1]) 
+    uri = os.getenv("NEO4J_URI")
+    user = os.getenv("NEO4J_USERNAME")
+    password = os.getenv("NEO4J_PASSWORD") 
+    connection = Neo4jConnection(uri, user, password)
+    with connection.driver.session() as session:
+        try:
+            gen_cypher = generate_cypher_query(llm, graph, query, cypher_prompt)
+            lines = gen_cypher.strip().split('\n') # Split into lines and strip whitespace
+            cleaned_gen_q = '\n'.join(lines[1:-1]) 
 
-    res = graph.query(cleaned_gen_q)
+            res = graph.query(cleaned_gen_q)
 
-    grouped_sections = {}
+            grouped_sections = {}
 
-    for record in res:
-        primary_section = record["primary_section"]
-        section_source = primary_section["section_source"]
+            for record in res:
+                primary_section = record["primary_section"]
+                section_source = primary_section["section_source"]
 
-        if section_source not in grouped_sections:
-            grouped_sections[section_source] = []
-        grouped_sections[section_source].append(primary_section)
-    
-    if grouped_sections == {}:
-        return res
-    else:
-        return grouped_sections
+                if section_source not in grouped_sections:
+                    grouped_sections[section_source] = []
+                grouped_sections[section_source].append(primary_section)
+            
+            connection.close()
+            if grouped_sections == {}:
+                return res
+            else:
+                return grouped_sections
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            connection.close()
+            return ""

@@ -22,3 +22,6 @@ RUN flask db init || echo "Migrations directory already exists"
 RUN flask db migrate -m "Initial migration" && flask db upgrade || echo "Migration failed or no changes to apply"
 
 CMD ["python3", "-u", "flask/app.py"]
+
+# Benchmarking
+# CMD ["jupyter", "nbconvert", "--to", "notebook", "--execute", "flask/benchmark/evaluation_playground.ipynb"]

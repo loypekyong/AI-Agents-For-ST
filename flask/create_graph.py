@@ -6,6 +6,10 @@ from collections import defaultdict
 from dotenv import load_dotenv
 load_dotenv()
 
+load_dotenv(dotenv_path="../.env")
+
+os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API")
+
 class Neo4jConnection:
     def __init__(self, uri, user, password):
         self.driver = GraphDatabase.driver(uri, auth=(user, password))
@@ -218,6 +222,11 @@ if __name__ == "__main__":
 
     directory_path = 'data_new/'  # Source directory
     completed_directory = 'data_completed/'  # Destination directory
+
+    # # For benchmarking
+    # directory_path = 'benchmark\\data_new\\'  # Source directory
+    # completed_directory = 'benchmark\\data_completed\\'  # Destination directory
+    
     data = connection.load_json_files_from_directory(directory_path)
 
     try:
