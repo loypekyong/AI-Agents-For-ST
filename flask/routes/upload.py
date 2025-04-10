@@ -46,11 +46,11 @@ def upload_file():
     kb_id = sector.lower() + "_kb_id"
     # create or get knowledge base
     kb = get_kb(sector)
-    # try:
-    #     kb_id = sector.lower() + "_kb_id"
-    #     graph_main.main(kb_id, "data_new") 
-    # except Exception as e:
-    #     print("Graph kb_id creation failed:", e)
+    try:
+        # kb_id = sector.lower() + "_kb_id"
+        graph_main.main(kb_id, sector) 
+    except Exception as e:
+        print("Graph kb_id creation failed:", e)
 
     # get path of specific kb file folder
     sector_path = os.path.join(UPLOAD_FOLDER, sector)
